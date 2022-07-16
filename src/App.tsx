@@ -31,6 +31,7 @@ const App: FC = () => {
 
 const Home: FC = () => {
   const dispatch = useDispatch();
+  const [count, setCount] = useState(0);
   const devices = useSelector(
     (state: RootState) => state.bluetooth.availableDevices,
   );
@@ -49,6 +50,23 @@ const Home: FC = () => {
 
   const connectToPeripheral = (device: BluetoothPeripheral) =>
     dispatch(initiateConnection(device.id));
+  
+    function binaryAgent(str: string) {
+      const bytes = str.split(' ')
+      let output = ''
+      
+      for (let k = 0; k < bytes.length; k++){
+        output += String.fromCharCode(parseInt(bytes[k], 2))
+      }
+      
+      return output
+    }
+    
+    function convertToText(x: number): string {
+        let binary = (x >>> 0).toString(2);
+        const result = binary.replace(/.{2}/g, '$& ');
+        return binaryAgent(result);
+    }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -60,7 +78,7 @@ const Home: FC = () => {
           </>
         ) : (
           <Text style={styles.heartRateTitleText}>
-            Please Connect to a Heart Rate Monitor
+            Please Connect to a Heart Rate Monitor {count}
           </Text>
         )}
       </View>
@@ -68,6 +86,7 @@ const Home: FC = () => {
         title="Connect"
         onPress={() => {
           dispatch(scanForPeripherals());
+          setCount(count + 1);
           setIsModalVisible(true);
         }}
       />

@@ -7,8 +7,8 @@ import {
   Device,
 } from 'react-native-ble-plx';
 
-const HEART_RATE_UUID = '0000180d-0000-1000-8000-00805f9b34fb';
-const HEART_RATE_CHARACTERISTIC = '00002a37-0000-1000-8000-00805f9b34fb';
+const HEART_RATE_UUID = '00001800-0000-1000-8000-00805f9b34fb';
+const HEART_RATE_CHARACTERISTIC = '00002a00-0000-1000-8000-00805f9b34fb';
 
 class BluetoothLeManager {
   bleManager: BleManager;
@@ -63,6 +63,8 @@ class BluetoothLeManager {
       heartRate =
         Number(data[1].charCodeAt(0) << 8) + Number(data[2].charCodeAt(2));
     }
+
+    heartRate = parseInt(data, 2);
 
     emitter({payload: heartRate});
   };
