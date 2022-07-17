@@ -49,8 +49,10 @@ const bluetoothReducer = createSlice({
       );
       const isCorsenseMonitor = action.payload?.name
         ?.toLowerCase()
-        ?.includes('corsense');
-      if (!isDuplicate && isCorsenseMonitor) {
+        ?.includes('nano');
+      if (!isDuplicate
+         && isCorsenseMonitor
+         ) {
         state.availableDevices = state.availableDevices.concat(action.payload);
       }
     },
