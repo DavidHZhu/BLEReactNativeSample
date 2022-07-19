@@ -69,7 +69,7 @@ class BluetoothLeManager {
     //     Number(data[1].charCodeAt(0) << 8) + Number(data[2].charCodeAt(2));
     // }
 
-    heartRate = parseInt(data, 2);
+    heartRate = parseInt(data);
 
     emitter({payload: heartRate});
   };

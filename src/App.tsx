@@ -73,12 +73,12 @@ const Home: FC = () => {
       <View style={styles.heartRateTitleWrapper}>
         {isConnected ? (
           <>
-            <Text style={styles.heartRateTitleText}>Your Heart Rate Is:</Text>
-            <Text style={styles.heartRateText}>{heartRate} bpm</Text>
+            <Text style={styles.heartRateTitleText}>Your Pace Is:</Text>
+            <Text style={styles.heartRateText}>{heartRate}</Text>
           </>
         ) : (
           <Text style={styles.heartRateTitleText}>
-            Please Connect to a Heart Rate Monitor {count}
+            Please Connect to a Arduino Nano BLE 33 {count}
           </Text>
         )}
       </View>
@@ -92,7 +92,7 @@ const Home: FC = () => {
       />
       {isConnected && (
         <CTAButton
-          title="Get Heart Rate"
+          title="Get BLE Read"
           onPress={() => {
             dispatch(startHeartRateScan());
           }}
