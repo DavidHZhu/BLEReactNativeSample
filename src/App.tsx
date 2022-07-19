@@ -9,7 +9,7 @@
  */
 
 import React, {FC, useState} from 'react';
-import {SafeAreaView, StyleSheet, Text, View} from 'react-native';
+import {SafeAreaView, StyleSheet, Text, View, TextInput} from 'react-native';
 import {Provider, useDispatch, useSelector} from 'react-redux';
 import CTAButton from './components/CTAButton';
 import DeviceModal from './components/DeviceConnectionModal';
@@ -20,6 +20,7 @@ import {
   startHeartRateScan,
 } from './modules/Bluetooth/bluetooth.reducer';
 import {RootState, store} from './store/store';
+import bluetoothLeManager from './modules/Bluetooth/BluetoothLeManager';
 
 const App: FC = () => {
   return (
@@ -68,6 +69,7 @@ const Home: FC = () => {
         return binaryAgent(result);
     }
 
+  const [myState, setMyState] = useState('');
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.heartRateTitleWrapper}>
@@ -82,6 +84,7 @@ const Home: FC = () => {
           </Text>
         )}
       </View>
+      <TextInput placeholder={'placeholder'} onChangeText={text => setMyState(text)} />
       <CTAButton
         title="Connect"
         onPress={() => {
@@ -95,6 +98,14 @@ const Home: FC = () => {
           title="Get BLE Read"
           onPress={() => {
             dispatch(startHeartRateScan());
+          }}
+        />
+      )}
+      {isConnected && (
+        <CTAButton
+          title="BLE WRITE"
+          onPress={() => {
+            bluetoothLeManager.sendBLEWrite(myState)
           }}
         />
       )}

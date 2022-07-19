@@ -9,7 +9,7 @@ import {
 
 const HEART_RATE_UUID = '0000180c-0000-1000-8000-00805f9b34fb';
 const HEART_RATE_CHARACTERISTIC = '00002a56-0000-1000-8000-00805f9b34fb';
-
+const WRITE_CHARACTERISTIC = '00002a56-0000-1000-8000-00805f9b34fb';
 class BluetoothLeManager {
   bleManager: BleManager;
   device: Device | null;
@@ -95,8 +95,24 @@ class BluetoothLeManager {
       this.onHeartRateUpdate(characteristic, emitter);
     })
   };
+  sendBLEWrite = async (
+    // emitter: (arg0: {payload: number | BleError}) => void,
+    myValue: string,
+  ) => {
+    console.log("SEND BLE WRITE " + myValue)
+    console.log("BTOA:" + base64.encode(myValue))
+    const base64value = "NDU2";
+    await this.device?.discoverAllServicesAndCharacteristics();
+    this.device?.writeCharacteristicWithResponseForService(
+      HEART_RATE_UUID,
+      WRITE_CHARACTERISTIC,
+      base64.encode(myValue)
+    ).then((characteristic) => {
+      console.log("Characteristic: " + characteristic.id);
+      // this.onHeartRateUpdate(characteristic, emitter);
+    })
+  };
 
-  
 }
 
 const bluetoothLeManager = new BluetoothLeManager();
