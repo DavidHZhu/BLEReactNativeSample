@@ -22,11 +22,12 @@ import {
 import {RootState, store} from './store/store';
 import bluetoothLeManager from './modules/Bluetooth/BluetoothLeManager';
 import RNLocation from 'react-native-location';
+import base64 from 'react-native-base64';
 
 // RNLocation.configure({
 //  distanceFilter: null
 // });
-
+var Buffer = require('buffer/').Buffer
 const App: FC = () => {
   return (
     <Provider store={store}>
@@ -96,22 +97,14 @@ const Home: FC = () => {
       setLatitude(location?.latitude)
       setLongitude(location?.longitude)
       console.log(latitude, longitude)
-      const hexString = latitude.toString(16);
-      console.log("hexstr:" , latitude)
-      console.log("hexstr2:" , parseFloat(-32.1283, 10).toString(16))
-      var view2 = new DataView(new ArrayBuffer(8));
-      const getHex = i => ('00' + i.toString(16)).slice(-2);
-      
-      view2.setFloat64(0, longitude);
-      //console.log(getHex(view2.getUint8(0)))
-      let output = '';
-      for(var i = 0; i < 8; i++){
-        // console.log(view2)
-        output = output.concat(getHex(view2.getUint8(i)))
-        console.log(getHex(view2.getUint8(i)))
-      }
-      console.log(output)
-      // console.log(Buffer.byteLength(output, 'utf8'));
+      var buf = Buffer.alloc(16);
+      buf.writeDoubleLE(latitude);
+      buf.writeDoubleLE(longitude, 8);
+      let output = buf.toString('base64');
+      console.log("Lat" + buf.readDoubleLE() + " Long" + buf.readDoubleLE(8));
+      console.log("Output=" + output)
+      console.log("Output Size=" + output.length);
+      bluetoothLeManager.sendBLEWriteString(output);
     }
   }
 

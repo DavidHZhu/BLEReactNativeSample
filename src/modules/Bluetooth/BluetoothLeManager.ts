@@ -102,13 +102,11 @@ class BluetoothLeManager {
     myValue: string,
   ) => {
     console.log("SEND BLE WRITE " + myValue)
-    console.log("BTOA:" + base64.encode(myValue))
-    const base64value = "c05e855efa615a8e";
     await this.device?.discoverAllServicesAndCharacteristics();
     this.device?.writeCharacteristicWithResponseForService(
       OP_BLE_UUID_OPCOM,
       OP_BLE_UUID_GPS,
-      base64.encode(myValue)
+      myValue
     ).then((characteristic) => {
       console.log("Characteristic: " + characteristic.id);
       // this.onHeartRateUpdate(characteristic, emitter);
