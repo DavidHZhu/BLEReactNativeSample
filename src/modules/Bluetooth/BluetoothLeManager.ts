@@ -7,8 +7,8 @@ import {
   Device,
 } from 'react-native-ble-plx';
 
-const HEART_RATE_UUID = '0000180c-0000-1000-8000-00805f9b34fb';
-const HEART_RATE_CHARACTERISTIC = '00002a56-0000-1000-8000-00805f9b34fb';
+const NANOBLUE33_SERVICE_UUID = '0000180c-0000-1000-8000-00805f9b34fb';
+// const HEART_RATE_CHARACTERISTIC = '00002a56-0000-1000-8000-00805f9b34fb';
 const WRITE_CHARACTERISTIC = '00002a56-0000-1000-8000-00805f9b34fb';
 class BluetoothLeManager {
   bleManager: BleManager;
@@ -79,14 +79,14 @@ class BluetoothLeManager {
   ) => {
     await this.device?.discoverAllServicesAndCharacteristics();
     // this.device?.monitorCharacteristicForService(
-    //   HEART_RATE_UUID,
+    //   NANOBLUE33_SERVICE_UUID,
     //   HEART_RATE_CHARACTERISTIC,
     //   (error, characteristic) =>
     //     this.onHeartRateUpdate(error, characteristic, emitter),
     // );
     this.device?.readCharacteristicForService(
-      HEART_RATE_UUID,
-      HEART_RATE_CHARACTERISTIC,
+      NANOBLUE33_SERVICE_UUID,
+      WRITE_CHARACTERISTIC,
       // (error, characteristic) => {
       //   this.onHeartRateUpdate(error, characteristic, emitter);
       // }
@@ -95,18 +95,18 @@ class BluetoothLeManager {
       this.onHeartRateUpdate(characteristic, emitter);
     })
   };
-  sendBLEWrite = async (
+  sendBLEWriteString = async (
     // emitter: (arg0: {payload: number | BleError}) => void,
     myValue: string,
   ) => {
     console.log("SEND BLE WRITE " + myValue)
     console.log("BTOA:" + base64.encode(myValue))
-    const base64value = "NDU2";
+    const base64value = "c05e855efa615a8e";
     await this.device?.discoverAllServicesAndCharacteristics();
     this.device?.writeCharacteristicWithResponseForService(
-      HEART_RATE_UUID,
+      NANOBLUE33_SERVICE_UUID,
       WRITE_CHARACTERISTIC,
-      base64.encode(myValue)
+      base64.encode(base64value)
     ).then((characteristic) => {
       console.log("Characteristic: " + characteristic.id);
       // this.onHeartRateUpdate(characteristic, emitter);

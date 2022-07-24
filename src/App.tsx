@@ -26,7 +26,7 @@ import RNLocation from 'react-native-location';
 // RNLocation.configure({
 //  distanceFilter: null
 // });
-
+var Buffer = require('buffer/').Buffer
 const App: FC = () => {
   return (
     <Provider store={store}>
@@ -59,45 +59,61 @@ const Home: FC = () => {
   const connectToPeripheral = (device: BluetoothPeripheral) =>
     dispatch(initiateConnection(device.id));
   
-    const getLocation = async () => {
-    
-      let permission = await RNLocation.checkPermission({
-        ios: 'whenInUse', // or 'always'
-        android: {
-          detail: 'coarse' // or 'fine'
-        }
-      });
-    
-      console.log(permission)
+  const getLocation = async () => {
   
-      let location;
-      if(!permission) {
-        permission = await RNLocation.requestPermission({
-          ios: "whenInUse",
-          android: {
-            detail: "coarse",
-            rationale: {
-              title: "We need to access your location",
-              message: "We use your location to show where you are on the map",
-              buttonPositive: "OK",
-              buttonNegative: "Cancel"
-            }
-          }
-        })
-        console.log(permission)
-        location = await RNLocation.getLatestLocation({timeout: 100})
-        console.log(location)
-        setLatitude(location?.latitude)
-        setLongitude(location?.longitude)
-        console.log(latitude, longitude)        
-      } else {
-        location = await RNLocation.getLatestLocation({timeout: 100})
-        console.log(location?.latitude)
-        setLatitude(location?.latitude)
-        setLongitude(location?.longitude)
-        console.log(latitude, longitude)
+    let permission = await RNLocation.checkPermission({
+      ios: 'whenInUse', // or 'always'
+      android: {
+        detail: 'coarse' // or 'fine'
       }
+    });
+  
+    console.log(permission)
+
+    let location;
+    if(!permission) {
+      permission = await RNLocation.requestPermission({
+        ios: "whenInUse",
+        android: {
+          detail: "coarse",
+          rationale: {
+            title: "We need to access your location",
+            message: "We use your location to show where you are on the map",
+            buttonPositive: "OK",
+            buttonNegative: "Cancel"
+          }
+        }
+      })
+      console.log(permission)
+      location = await RNLocation.getLatestLocation({timeout: 100})
+      console.log(location)
+      setLatitude(location?.latitude)
+      setLongitude(location?.longitude)
+      console.log(latitude, longitude)        
+    } else {
+      location = await RNLocation.getLatestLocation({timeout: 100})
+      console.log(location?.latitude)
+      setLatitude(location?.latitude)
+      setLongitude(location?.longitude)
+      console.log(latitude, longitude)
+      const hexString = latitude.toString(16);
+      console.log("hexstr:" , latitude)
+      console.log("hexstr2:" , parseFloat(-32.1283, 10).toString(16))
+      var view2 = new DataView(new ArrayBuffer(8));
+      const getHex = i => ('00' + i.toString(16)).slice(-2);
+      
+      view2.setFloat64(0, longitude);
+      //console.log(getHex(view2.getUint8(0)))
+      let output = '';
+      for(var i = 0; i < 8; i++){
+        // console.log(view2)
+        output = output.concat(getHex(view2.getUint8(i)))
+        console.log(getHex(view2.getUint8(i)))
+      }
+      console.log(output)
+      console.log(Buffer.byteLength(output, 'utf8'));
     }
+  }
 
   const [myState, setMyState] = useState('');
   return (
@@ -142,7 +158,7 @@ const Home: FC = () => {
         <CTAButton
           title="BLE WRITE"
           onPress={() => {
-            bluetoothLeManager.sendBLEWrite(myState)
+            bluetoothLeManager.sendBLEWriteString(myState)
           }}
         />
       )}
