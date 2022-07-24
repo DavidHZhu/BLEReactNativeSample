@@ -10,6 +10,8 @@ import {
 const NANOBLUE33_SERVICE_UUID = '0000180c-0000-1000-8000-00805f9b34fb';
 // const HEART_RATE_CHARACTERISTIC = '00002a56-0000-1000-8000-00805f9b34fb';
 const WRITE_CHARACTERISTIC = '00002a56-0000-1000-8000-00805f9b34fb';
+const OP_BLE_UUID_GPS = "38098fbb-6d25-499a-a6a0-fe2eb8c3d2d3";
+const OP_BLE_UUID_OPCOM = "bad92b28-d3ec-4362-808b-8113286cc3e3";
 class BluetoothLeManager {
   bleManager: BleManager;
   device: Device | null;
@@ -106,7 +108,7 @@ class BluetoothLeManager {
     this.device?.writeCharacteristicWithResponseForService(
       NANOBLUE33_SERVICE_UUID,
       WRITE_CHARACTERISTIC,
-      base64.encode(base64value)
+      base64.encode(myValue)
     ).then((characteristic) => {
       console.log("Characteristic: " + characteristic.id);
       // this.onHeartRateUpdate(characteristic, emitter);
