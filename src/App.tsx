@@ -22,6 +22,7 @@ import {
 import {RootState, store} from './store/store';
 import bluetoothLeManager from './modules/Bluetooth/BluetoothLeManager';
 import RNLocation from 'react-native-location';
+import base64 from 'react-native-base64';
 
 // RNLocation.configure({
 //  distanceFilter: null
@@ -105,12 +106,53 @@ const Home: FC = () => {
       view2.setFloat64(0, longitude);
       //console.log(getHex(view2.getUint8(0)))
       let output = '';
+      let tempVal = '';
+      let tempNum = 0;
+      let tempAscii = '';
+      var buffer = [];
       for(var i = 0; i < 8; i++){
         // console.log(view2)
-        output = output.concat(getHex(view2.getUint8(i)))
-        console.log(getHex(view2.getUint8(i)))
+        // tempVal = "0x".concat(getHex(view2.getUint8(i)))
+        // tempVal = "0x00"
+
+        tempVal = ("00000000" + (parseInt(getHex(view2.getUint8(i)), 16)).toString(2)).substr(-8)
+        console.log("tempVal: " + tempVal);
+        buffer.push(tempVal);
+        // convert to ascii
+        // tempNum = Number(tempVal);
+        // console.log("tempNum: " + tempNum)
+        // output = output.concat(String.fromCharCode(tempNum));
+        // output
+        // output = output.concat(getHex(view2.getUint8(i)))
+        // console.log(getHex(view2.getUint8(i)))
       }
-      console.log(output)
+      var bytes = new Uint8Array(buffer);
+      var len = bytes.byteLength;
+      console.log("len: " + len);
+      let binary = '';
+      for (var i = 0; i < len; i++) {
+        console.log(i + ": " + bytes[i]);
+        binary += String.fromCharCode(bytes[i]);
+      }
+      var usingNorm = base64.encode(binary);
+      var usingFrom = Buffer.from(bytes).toString('base64');
+      console.log("Binary: " + binary);
+      console.log("Base 64: " + usingNorm);
+      console.log("Using From: " + usingFrom);
+
+      var decodeTest1 = base64.decode(usingNorm);
+      var decodeTest2 = base64.decode(usingFrom);
+
+      console.log("decode tests: 1: " + decodeTest1 + " 2: " + decodeTest2);
+
+      console.log(output)//c05....
+      console.log("Length: " + output.length)
+
+      let output_test = '';
+      for (var i = 0; i < output.length; i++) {
+        output_test += output[i].charCodeAt(0).toString(2) + " ";
+      }
+      console.log("Binary rep: " + output_test);
       console.log(Buffer.byteLength(output, 'utf8'));
     }
   }

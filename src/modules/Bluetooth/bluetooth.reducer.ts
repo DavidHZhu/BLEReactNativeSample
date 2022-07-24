@@ -47,9 +47,10 @@ const bluetoothReducer = createSlice({
       const isDuplicate = state.availableDevices.some(
         device => device.id === action.payload.id,
       );
+      console.log("----PAYLOAD FOUND-----:" + action.payload?.id);
       const isCorsenseMonitor = action.payload?.name
         ?.toLowerCase()
-        ?.includes('nano');
+        ?.includes('opticpace');
       if (!isDuplicate
          && isCorsenseMonitor
          ) {

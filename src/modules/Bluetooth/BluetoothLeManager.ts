@@ -87,7 +87,7 @@ class BluetoothLeManager {
     //     this.onHeartRateUpdate(error, characteristic, emitter),
     // );
     this.device?.readCharacteristicForService(
-      NANOBLUE33_SERVICE_UUID,
+      OP_BLE_UUID_OPCOM,
       WRITE_CHARACTERISTIC,
       // (error, characteristic) => {
       //   this.onHeartRateUpdate(error, characteristic, emitter);
@@ -104,11 +104,45 @@ class BluetoothLeManager {
     console.log("SEND BLE WRITE " + myValue)
     console.log("BTOA:" + base64.encode(myValue))
     const base64value = "c05e855efa615a8e";
+    const test = [192, 84, 34, 128, 46, 249, 232, 143]
+    const test1 = ["c0", "5e", "85", "5e", "fa", "61", "5a", "8e"];
+
+    var buffer = [];
+    for (let i = 0; i < test1.length; i ++) {
+      buffer.push(("00000000" + (parseInt(test1[i], 16)).toString(2)).substr(-8));
+    }
+    var bytes = new Uint8Array(buffer);
+
+    var len = bytes.byteLength;
+    console.log("len: " + len);
+    let binary = '';
+    for (var i = 0; i < len; i++) {
+      binary += String.fromCharCode(bytes[i]);
+    }
+
+    binary = binary.concat(binary);
+
+    
+    let testOutput = '';
+    for(let i = 0; i < test.length; i++) {
+      testOutput = testOutput.concat(String.fromCharCode(test[i]));
+    }
+    for(let i = 0; i < test.length; i++) {
+      testOutput = testOutput.concat(String.fromCharCode(test[i]));
+    }
+
+    console.log("Sending: " + testOutput);
+    console.log("Base64encode: " + base64.encode(testOutput));
+    console.log("Length: " + base64.encode(testOutput).length);
+    
+    testOutput = "AAAAAAAAAAAAAAAA";
     await this.device?.discoverAllServicesAndCharacteristics();
     this.device?.writeCharacteristicWithResponseForService(
-      NANOBLUE33_SERVICE_UUID,
-      WRITE_CHARACTERISTIC,
-      base64.encode(myValue)
+      OP_BLE_UUID_OPCOM,
+      OP_BLE_UUID_GPS,
+      // base64.encode(testOutput)
+      base64.encode(binary)
+      // testOutput
     ).then((characteristic) => {
       console.log("Characteristic: " + characteristic.id);
       // this.onHeartRateUpdate(characteristic, emitter);
