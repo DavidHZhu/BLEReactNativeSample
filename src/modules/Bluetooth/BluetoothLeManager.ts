@@ -87,7 +87,7 @@ class BluetoothLeManager {
     //     this.onHeartRateUpdate(error, characteristic, emitter),
     // );
     this.device?.readCharacteristicForService(
-      NANOBLUE33_SERVICE_UUID,
+      OP_BLE_UUID_OPCOM,
       WRITE_CHARACTERISTIC,
       // (error, characteristic) => {
       //   this.onHeartRateUpdate(error, characteristic, emitter);
@@ -106,8 +106,8 @@ class BluetoothLeManager {
     const base64value = "c05e855efa615a8e";
     await this.device?.discoverAllServicesAndCharacteristics();
     this.device?.writeCharacteristicWithResponseForService(
-      NANOBLUE33_SERVICE_UUID,
-      WRITE_CHARACTERISTIC,
+      OP_BLE_UUID_OPCOM,
+      OP_BLE_UUID_GPS,
       base64.encode(myValue)
     ).then((characteristic) => {
       console.log("Characteristic: " + characteristic.id);

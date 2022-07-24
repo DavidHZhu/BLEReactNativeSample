@@ -26,7 +26,7 @@ import RNLocation from 'react-native-location';
 // RNLocation.configure({
 //  distanceFilter: null
 // });
-var Buffer = require('buffer/').Buffer
+
 const App: FC = () => {
   return (
     <Provider store={store}>
@@ -111,7 +111,7 @@ const Home: FC = () => {
         console.log(getHex(view2.getUint8(i)))
       }
       console.log(output)
-      console.log(Buffer.byteLength(output, 'utf8'));
+      // console.log(Buffer.byteLength(output, 'utf8'));
     }
   }
 

@@ -49,7 +49,7 @@ const bluetoothReducer = createSlice({
       );
       const isCorsenseMonitor = action.payload?.name
         ?.toLowerCase()
-        ?.includes('nano');
+        ?.includes('opticpace');
       if (!isDuplicate
          && isCorsenseMonitor
          ) {
