@@ -27,7 +27,7 @@ import base64 from 'react-native-base64';
 // RNLocation.configure({
 //  distanceFilter: null
 // });
-var Buffer = require('buffer/').Buffer
+var Buffer = require('buffer/').Buffer;
 const App: FC = () => {
   return (
     <Provider store={store}>
@@ -36,11 +36,16 @@ const App: FC = () => {
   );
 };
 
+function sleep(ms) {
+  // could be in a utils file
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 const Home: FC = () => {
   const dispatch = useDispatch();
   const [count, setCount] = useState(0);
-  const [latitude, setLatitude] = useState(0 || null)
-  const [longitude, setLongitude] = useState(0 || null)
+  const [latitude, setLatitude] = useState(0 || null);
+  const [longitude, setLongitude] = useState(0 || null);
   const devices = useSelector(
     (state: RootState) => state.bluetooth.availableDevices,
   );
@@ -59,54 +64,56 @@ const Home: FC = () => {
 
   const connectToPeripheral = (device: BluetoothPeripheral) =>
     dispatch(initiateConnection(device.id));
-  
+
   const getLocation = async () => {
-  
     let permission = await RNLocation.checkPermission({
       ios: 'whenInUse', // or 'always'
       android: {
-        detail: 'coarse' // or 'fine'
-      }
+        detail: 'coarse', // or 'fine'
+      },
     });
-  
-    console.log(permission)
+
+    console.log(permission);
 
     let location;
-    if(!permission) {
+    if (!permission) {
       permission = await RNLocation.requestPermission({
-        ios: "whenInUse",
+        ios: 'whenInUse',
         android: {
-          detail: "coarse",
+          detail: 'coarse',
           rationale: {
-            title: "We need to access your location",
-            message: "We use your location to show where you are on the map",
-            buttonPositive: "OK",
-            buttonNegative: "Cancel"
-          }
-        }
-      })
-      console.log(permission)
-      location = await RNLocation.getLatestLocation({timeout: 100})
-      console.log(location)
-      setLatitude(location?.latitude)
-      setLongitude(location?.longitude)
-      console.log(latitude, longitude)        
+            title: 'We need to access your location',
+            message: 'We use your location to show where you are on the map',
+            buttonPositive: 'OK',
+            buttonNegative: 'Cancel',
+          },
+        },
+      });
+      console.log(permission);
+      location = await RNLocation.getLatestLocation({timeout: 100});
+      console.log(location);
+      setLatitude(location?.latitude);
+      setLongitude(location?.longitude);
+      console.log(latitude, longitude);
     } else {
-      location = await RNLocation.getLatestLocation({timeout: 100})
-      console.log(location?.latitude)
-      setLatitude(location?.latitude)
-      setLongitude(location?.longitude)
-      console.log(latitude, longitude)
-      var buf = Buffer.alloc(16);
-      buf.writeDoubleLE(latitude);
-      buf.writeDoubleLE(longitude, 8);
-      let output = buf.toString('base64');
-      console.log("Lat" + buf.readDoubleLE() + " Long" + buf.readDoubleLE(8));
-      console.log("Output=" + output)
-      console.log("Output Size=" + output.length);
-      bluetoothLeManager.sendBLEWriteString(output);
+      while (true) {
+        location = await RNLocation.getLatestLocation({timeout: 100});
+        console.log(location?.latitude);
+        setLatitude(location?.latitude);
+        setLongitude(location?.longitude);
+        console.log(location?.latitude, location?.latitude);
+        var buf = Buffer.alloc(16);
+        buf.writeDoubleLE(location?.latitude);
+        buf.writeDoubleLE(location?.latitude, 8);
+        let output = buf.toString('base64');
+        console.log('Lat' + buf.readDoubleLE() + ' Long' + buf.readDoubleLE(8));
+        console.log('Output=' + output);
+        console.log('Output Size=' + output.length);
+        bluetoothLeManager.sendBLEWriteString(output);
+        await sleep(5000);
+      }
     }
-  }
+  };
 
   const [myState, setMyState] = useState('');
   return (
@@ -130,7 +137,12 @@ const Home: FC = () => {
           </>
         )}
       </View>
-      {isConnected && (<TextInput placeholder={'placeholder'} onChangeText={text => setMyState(text)} />)}
+      {isConnected && (
+        <TextInput
+          placeholder={'placeholder'}
+          onChangeText={text => setMyState(text)}
+        />
+      )}
       <CTAButton
         title="Connect"
         onPress={() => {
@@ -151,7 +163,7 @@ const Home: FC = () => {
         <CTAButton
           title="BLE WRITE"
           onPress={() => {
-            bluetoothLeManager.sendBLEWriteString(myState)
+            bluetoothLeManager.sendBLEWriteString(myState);
           }}
         />
       )}
@@ -159,7 +171,7 @@ const Home: FC = () => {
         <CTAButton
           title="GET GPS LOCATION"
           onPress={() => {
-            getLocation()
+            getLocation();
           }}
         />
       )}
