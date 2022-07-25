@@ -150,7 +150,7 @@ class BluetoothLeManager {
     this.device
       ?.writeCharacteristicWithResponseForService(
         OP_BLE_UUID_OPCOM,
-        OP_BLE_UUID_RST,
+        OP_BLE_UUID_HEIGHT,
         output,
       )
       .then(characteristic => {
