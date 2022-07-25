@@ -116,6 +116,7 @@ const Home: FC = () => {
   };
 
   const [myState, setMyState] = useState('');
+  const [myHeight, setMyHeight] = useState('');
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.heartRateTitleWrapper}>
@@ -143,6 +144,14 @@ const Home: FC = () => {
           onChangeText={text => setMyState(text)}
         />
       )}
+      {true && (
+        <TextInput
+          placeholder={'placeholder'}
+          onChangeText={text => setMyHeight(text)}
+          style={styles.input}
+        />
+      )}
+
       <CTAButton
         title="Connect"
         onPress={() => {
@@ -164,6 +173,29 @@ const Home: FC = () => {
           title="BLE WRITE"
           onPress={() => {
             bluetoothLeManager.sendBLEWriteString(myState);
+          }}
+        />
+      )}
+      {true && (
+        <CTAButton
+          title="SEND HEIGHT"
+          onPress={() => {
+            // can move this to an actual function
+            const height = parseFloat(myHeight);
+            if (isNaN(height)) {
+              console.log('Configure valid height!');
+            } else {
+              console.log('My height: ' + height);
+              bluetoothLeManager.sendBLEWriteHeight(height);
+            }
+          }}
+        />
+      )}
+      {isConnected && (
+        <CTAButton
+          title="RESET"
+          onPress={() => {
+            bluetoothLeManager.sendBLEWriteReset();
           }}
         />
       )}
@@ -204,6 +236,12 @@ const styles = StyleSheet.create({
   heartRateText: {
     fontSize: 25,
     marginTop: 15,
+  },
+  input: {
+    flex: 1,
+    width: '80%',
+    fontSize: 18,
+    color: '#101010',
   },
 });
 
