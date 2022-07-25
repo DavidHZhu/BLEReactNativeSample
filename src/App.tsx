@@ -127,7 +127,7 @@ const Home: FC = () => {
           </>
         ) : (
           <Text style={styles.heartRateTitleText}>
-            Please Connect to a Arduino Nano BLE 33 {count}
+            Please Connect to a Arduino Nano BLE 33 {myHeight}
           </Text>
         )}
         {latitude && longitude && (
@@ -147,7 +147,7 @@ const Home: FC = () => {
       {true && (
         <TextInput
           placeholder={'placeholder'}
-          onChangeText={text => setMyHeight(text)}
+          onChangeText={text => text==='' ? setMyHeight("0") : setMyHeight(text)}
           style={styles.input}
         />
       )}
@@ -176,7 +176,7 @@ const Home: FC = () => {
           }}
         />
       )}
-      {true && (
+      {isConnected && (
         <CTAButton
           title="SEND HEIGHT"
           onPress={() => {
@@ -199,7 +199,7 @@ const Home: FC = () => {
           }}
         />
       )}
-      {true && (
+      {isConnected && (
         <CTAButton
           title="GET GPS LOCATION"
           onPress={() => {
