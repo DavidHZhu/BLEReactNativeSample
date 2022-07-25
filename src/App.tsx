@@ -21,7 +21,13 @@ import {
 } from './modules/Bluetooth/bluetooth.reducer';
 import {RootState, store} from './store/store';
 import bluetoothLeManager from './modules/Bluetooth/BluetoothLeManager';
+import RNLocation from 'react-native-location';
+import base64 from 'react-native-base64';
 
+// RNLocation.configure({
+//  distanceFilter: null
+// });
+var Buffer = require('buffer/').Buffer;
 const App: FC = () => {
   return (
     <Provider store={store}>
@@ -30,9 +36,16 @@ const App: FC = () => {
   );
 };
 
+function sleep(ms) {
+  // could be in a utils file
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
 const Home: FC = () => {
   const dispatch = useDispatch();
   const [count, setCount] = useState(0);
+  const [latitude, setLatitude] = useState(0 || null);
+  const [longitude, setLongitude] = useState(0 || null);
   const devices = useSelector(
     (state: RootState) => state.bluetooth.availableDevices,
   );
@@ -51,25 +64,59 @@ const Home: FC = () => {
 
   const connectToPeripheral = (device: BluetoothPeripheral) =>
     dispatch(initiateConnection(device.id));
-  
-    function binaryAgent(str: string) {
-      const bytes = str.split(' ')
-      let output = ''
-      
-      for (let k = 0; k < bytes.length; k++){
-        output += String.fromCharCode(parseInt(bytes[k], 2))
+
+  const getLocation = async () => {
+    let permission = await RNLocation.checkPermission({
+      ios: 'whenInUse', // or 'always'
+      android: {
+        detail: 'coarse', // or 'fine'
+      },
+    });
+
+    console.log(permission);
+
+    let location;
+    if (!permission) {
+      permission = await RNLocation.requestPermission({
+        ios: 'whenInUse',
+        android: {
+          detail: 'coarse',
+          rationale: {
+            title: 'We need to access your location',
+            message: 'We use your location to show where you are on the map',
+            buttonPositive: 'OK',
+            buttonNegative: 'Cancel',
+          },
+        },
+      });
+      console.log(permission);
+      location = await RNLocation.getLatestLocation({timeout: 100});
+      console.log(location);
+      setLatitude(location?.latitude);
+      setLongitude(location?.longitude);
+      console.log(latitude, longitude);
+    } else {
+      while (true) {
+        location = await RNLocation.getLatestLocation({timeout: 100});
+        console.log(location?.latitude);
+        setLatitude(location?.latitude);
+        setLongitude(location?.longitude);
+        console.log(location?.latitude, location?.latitude);
+        var buf = Buffer.alloc(16);
+        buf.writeDoubleLE(location?.latitude);
+        buf.writeDoubleLE(location?.latitude, 8);
+        let output = buf.toString('base64');
+        console.log('Lat' + buf.readDoubleLE() + ' Long' + buf.readDoubleLE(8));
+        console.log('Output=' + output);
+        console.log('Output Size=' + output.length);
+        bluetoothLeManager.sendBLEWriteString(output);
+        await sleep(5000);
       }
-      
-      return output
     }
-    
-    function convertToText(x: number): string {
-        let binary = (x >>> 0).toString(2);
-        const result = binary.replace(/.{2}/g, '$& ');
-        return binaryAgent(result);
-    }
+  };
 
   const [myState, setMyState] = useState('');
+  const [myHeight, setMyHeight] = useState('');
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.heartRateTitleWrapper}>
@@ -83,8 +130,28 @@ const Home: FC = () => {
             Please Connect to a Arduino Nano BLE 33 {count}
           </Text>
         )}
+        {latitude && longitude && (
+          <>
+            <Text>Your Location Is</Text>
+            <Text style={styles.heartRateText}>LAT: {latitude}</Text>
+            <Text style={styles.heartRateText}>LONG: {longitude}</Text>
+          </>
+        )}
       </View>
-      <TextInput placeholder={'placeholder'} onChangeText={text => setMyState(text)} />
+      {isConnected && (
+        <TextInput
+          placeholder={'placeholder'}
+          onChangeText={text => setMyState(text)}
+        />
+      )}
+      {true && (
+        <TextInput
+          placeholder={'placeholder'}
+          onChangeText={text => setMyHeight(text)}
+          style={styles.input}
+        />
+      )}
+
       <CTAButton
         title="Connect"
         onPress={() => {
@@ -105,7 +172,38 @@ const Home: FC = () => {
         <CTAButton
           title="BLE WRITE"
           onPress={() => {
-            bluetoothLeManager.sendBLEWrite(myState)
+            bluetoothLeManager.sendBLEWriteString(myState);
+          }}
+        />
+      )}
+      {true && (
+        <CTAButton
+          title="SEND HEIGHT"
+          onPress={() => {
+            // can move this to an actual function
+            const height = parseFloat(myHeight);
+            if (isNaN(height)) {
+              console.log('Configure valid height!');
+            } else {
+              console.log('My height: ' + height);
+              bluetoothLeManager.sendBLEWriteHeight(height);
+            }
+          }}
+        />
+      )}
+      {isConnected && (
+        <CTAButton
+          title="RESET"
+          onPress={() => {
+            bluetoothLeManager.sendBLEWriteReset();
+          }}
+        />
+      )}
+      {true && (
+        <CTAButton
+          title="GET GPS LOCATION"
+          onPress={() => {
+            getLocation();
           }}
         />
       )}
@@ -138,6 +236,12 @@ const styles = StyleSheet.create({
   heartRateText: {
     fontSize: 25,
     marginTop: 15,
+  },
+  input: {
+    flex: 1,
+    width: '80%',
+    fontSize: 18,
+    color: '#101010',
   },
 });
 

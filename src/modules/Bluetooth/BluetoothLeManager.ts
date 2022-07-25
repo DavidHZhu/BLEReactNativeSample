@@ -6,10 +6,15 @@ import {
   Characteristic,
   Device,
 } from 'react-native-ble-plx';
+var Buffer = require('buffer/').Buffer;
 
-const HEART_RATE_UUID = '0000180c-0000-1000-8000-00805f9b34fb';
-const HEART_RATE_CHARACTERISTIC = '00002a56-0000-1000-8000-00805f9b34fb';
+const NANOBLUE33_SERVICE_UUID = '0000180c-0000-1000-8000-00805f9b34fb';
+// const HEART_RATE_CHARACTERISTIC = '00002a56-0000-1000-8000-00805f9b34fb';
 const WRITE_CHARACTERISTIC = '00002a56-0000-1000-8000-00805f9b34fb';
+const OP_BLE_UUID_GPS = '38098fbb-6d25-499a-a6a0-fe2eb8c3d2d3';
+const OP_BLE_UUID_OPCOM = 'bad92b28-d3ec-4362-808b-8113286cc3e3';
+const OP_BLE_UUID_RST = 'f8b6f810-0b8b-4dbd-9d2c-6acbd37b7d23';
+const OP_BLE_UUID_HEIGHT = '1833619c-85a8-4133-91ab-3094fb475f81';
 class BluetoothLeManager {
   bleManager: BleManager;
   device: Device | null;
@@ -50,15 +55,15 @@ class BluetoothLeManager {
     // if (error) {
     //   emitter({payload: error});
     // }
-    console.log("TEST: " + characteristic?.id);
-    console.log("TEST: " + characteristic?.uuid);
-    console.log("TEST: " + characteristic?.serviceID);
-    console.log("TEST: " + characteristic?.serviceUUID);
+    console.log('TEST: ' + characteristic?.id);
+    console.log('TEST: ' + characteristic?.uuid);
+    console.log('TEST: ' + characteristic?.serviceID);
+    console.log('TEST: ' + characteristic?.serviceUUID);
 
-    console.log("TEST: " + characteristic?.value);
+    console.log('TEST: ' + characteristic?.value);
     const data = base64.decode(characteristic?.value ?? '');
     let heartRate: number = -1;
-    console.log("---------------------DATA----------------:" + data);
+    console.log('---------------------DATA----------------:' + data);
 
     // const firstBitValue: number = (<any>data[0]) & 0x01;
 
@@ -79,40 +84,79 @@ class BluetoothLeManager {
   ) => {
     await this.device?.discoverAllServicesAndCharacteristics();
     // this.device?.monitorCharacteristicForService(
-    //   HEART_RATE_UUID,
+    //   NANOBLUE33_SERVICE_UUID,
     //   HEART_RATE_CHARACTERISTIC,
     //   (error, characteristic) =>
     //     this.onHeartRateUpdate(error, characteristic, emitter),
     // );
-    this.device?.readCharacteristicForService(
-      HEART_RATE_UUID,
-      HEART_RATE_CHARACTERISTIC,
-      // (error, characteristic) => {
-      //   this.onHeartRateUpdate(error, characteristic, emitter);
-      // }
-    ).then((characteristic) => {
-      console.log("Characteristic: " + characteristic.id);
-      this.onHeartRateUpdate(characteristic, emitter);
-    })
+    this.device
+      ?.readCharacteristicForService(
+        OP_BLE_UUID_OPCOM,
+        WRITE_CHARACTERISTIC,
+        // (error, characteristic) => {
+        //   this.onHeartRateUpdate(error, characteristic, emitter);
+        // }
+      )
+      .then(characteristic => {
+        console.log('Characteristic: ' + characteristic.id);
+        this.onHeartRateUpdate(characteristic, emitter);
+      });
   };
-  sendBLEWrite = async (
+  sendBLEWriteString = async (
     // emitter: (arg0: {payload: number | BleError}) => void,
     myValue: string,
   ) => {
-    console.log("SEND BLE WRITE " + myValue)
-    console.log("BTOA:" + base64.encode(myValue))
-    const base64value = "NDU2";
+    console.log('SEND BLE WRITE ' + myValue);
     await this.device?.discoverAllServicesAndCharacteristics();
-    this.device?.writeCharacteristicWithResponseForService(
-      HEART_RATE_UUID,
-      WRITE_CHARACTERISTIC,
-      base64.encode(myValue)
-    ).then((characteristic) => {
-      console.log("Characteristic: " + characteristic.id);
-      // this.onHeartRateUpdate(characteristic, emitter);
-    })
+    this.device
+      ?.writeCharacteristicWithResponseForService(
+        OP_BLE_UUID_OPCOM,
+        OP_BLE_UUID_GPS,
+        myValue,
+      )
+      .then(characteristic => {
+        console.log('Characteristic: ' + characteristic.id);
+        // this.onHeartRateUpdate(characteristic, emitter);
+      });
   };
 
+  sendBLEWriteReset = async () => {
+    const buf = Buffer.alloc(1);
+    buf.writeUint8(1);
+    const output = buf.toString('base64');
+
+    console.log('SENDING RESET');
+
+    await this.device?.discoverAllServicesAndCharacteristics();
+    this.device
+      ?.writeCharacteristicWithResponseForService(
+        OP_BLE_UUID_OPCOM,
+        OP_BLE_UUID_RST,
+        output,
+      )
+      .then(characteristic => {
+        console.log('Characteristic: ' + characteristic.id);
+      });
+  };
+
+  sendBLEWriteHeight = async (height: number) => {
+    console.log('SEND BLE WRITE HEIGHT: ' + height);
+
+    const buf = Buffer.alloc(8);
+    buf.writeDoubleLE(height);
+    const output = buf.toString('base64');
+
+    await this.device?.discoverAllServicesAndCharacteristics();
+    this.device
+      ?.writeCharacteristicWithResponseForService(
+        OP_BLE_UUID_OPCOM,
+        OP_BLE_UUID_HEIGHT,
+        output,
+      )
+      .then(characteristic => {
+        console.log('Characteristic: ' + characteristic.id);
+      });
+  };
 }
 
 const bluetoothLeManager = new BluetoothLeManager();
