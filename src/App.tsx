@@ -104,7 +104,7 @@ const Home: FC = () => {
         console.log(location?.latitude, location?.latitude);
         var buf = Buffer.alloc(16);
         buf.writeDoubleLE(location?.latitude);
-        buf.writeDoubleLE(location?.latitude, 8);
+        buf.writeDoubleLE(location?.longitude, 8);
         let output = buf.toString('base64');
         console.log('Lat' + buf.readDoubleLE() + ' Long' + buf.readDoubleLE(8));
         console.log('Output=' + output);
