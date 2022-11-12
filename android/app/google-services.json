@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "445496909221",
+    "project_id": "fydpopticpace",
+    "storage_bucket": "fydpopticpace.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:445496909221:android:6a6d85d5fac2c63c04dc4c",
+        "android_client_info": {
+          "package_name": "com.blereactnativesample"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "445496909221-5o9834aknru18378ad2cgedrrdnvdkhk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAsZQriUwqj4jDp78ubUhzkls4R1rFBOFw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "445496909221-5o9834aknru18378ad2cgedrrdnvdkhk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

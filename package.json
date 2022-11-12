@@ -10,6 +10,8 @@
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx"
   },
   "dependencies": {
+    "@react-native-firebase/analytics": "^16.4.3",
+    "@react-native-firebase/app": "^16.4.3",
     "@reduxjs/toolkit": "^1.5.1",
     "@types/react-redux": "^7.1.16",
     "buffer": "^6.0.3",
