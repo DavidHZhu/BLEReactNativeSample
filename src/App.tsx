@@ -123,18 +123,18 @@ const Home: FC = () => {
 
   function HomeScreen() {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <View style={styles.title}>
         <Text>Home Screen</Text>
       </View>
     );
   }
   const Stack = createNativeStackNavigator();
-  
+
   const [myState, setMyState] = useState('');
   const [myHeight, setMyHeight] = useState('');
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator screenOptions={{headerTitleAlign: 'center'}}>
         <Stack.Screen name="Home" component={HomeScreen} />
       </Stack.Navigator>
     </NavigationContainer>
@@ -277,6 +277,11 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginLeft: 10
   },
+  title: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center'
+  }
 });
 
 export default App;
