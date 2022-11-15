@@ -9,6 +9,8 @@
  */
 
 import React, {FC, useState} from 'react';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {SafeAreaView, StyleSheet, Text, View, TextInput} from 'react-native';
 import {Provider, useDispatch, useSelector} from 'react-redux';
 import CTAButton from './components/CTAButton';
@@ -119,10 +121,24 @@ const Home: FC = () => {
     }
   };
 
+  function HomeScreen() {
+    return (
+      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+        <Text>Home Screen</Text>
+      </View>
+    );
+  }
+  const Stack = createNativeStackNavigator();
+  
   const [myState, setMyState] = useState('');
   const [myHeight, setMyHeight] = useState('');
   return (
-    <SafeAreaView style={styles.container}>
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen name="Home" component={HomeScreen} />
+      </Stack.Navigator>
+    </NavigationContainer>
+    /*<SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
         <FontAwesomeIcon size={25} color="mediumpurple" icon={faGear}></FontAwesomeIcon>
         <Text style={styles.appName}>OpticPace</Text>
@@ -221,7 +237,7 @@ const Home: FC = () => {
         closeModal={closeModal}
         connectToPeripheral={connectToPeripheral}
       />
-    </SafeAreaView>
+    </SafeAreaView>*/
   );
 };
 
