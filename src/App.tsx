@@ -23,6 +23,10 @@ import {RootState, store} from './store/store';
 import bluetoothLeManager from './modules/Bluetooth/BluetoothLeManager';
 import RNLocation from 'react-native-location';
 import base64 from 'react-native-base64';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faGear } from '@fortawesome/free-solid-svg-icons';
+import { inlineStyles } from 'react-native-svg';
+import { toHtml } from '@fortawesome/fontawesome-svg-core';
 
 // RNLocation.configure({
 //  distanceFilter: null
@@ -119,6 +123,10 @@ const Home: FC = () => {
   const [myHeight, setMyHeight] = useState('');
   return (
     <SafeAreaView style={styles.container}>
+      <View style={styles.headerContainer}>
+        <FontAwesomeIcon size={25} color="mediumpurple" icon={faGear}></FontAwesomeIcon>
+        <Text style={styles.appName}>OpticPace</Text>
+      </View>
       <View style={styles.heartRateTitleWrapper}>
         {isConnected ? (
           <>
@@ -242,6 +250,16 @@ const styles = StyleSheet.create({
     width: '80%',
     fontSize: 18,
     color: '#101010',
+  },
+  appName: {
+    position: 'absolute',
+    left: 129,
+    fontSize: 25,
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    marginTop: 10,
+    marginLeft: 10
   },
 });
 
