@@ -145,6 +145,19 @@ const Home: FC = () => {
             </>
           )}
         </View>
+        {isConnected && (
+          <TextInput
+            placeholder={'placeholder'}
+            onChangeText={text => setMyState(text)}
+          />
+        )}
+        {true && (
+          <TextInput
+            placeholder={'placeholder'}
+            onChangeText={text => setMyHeight(text)}
+            style={styles.input}
+          />
+        )}
       </SafeAreaView>
     );
   }
