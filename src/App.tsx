@@ -24,11 +24,13 @@ import {
 import {RootState, store} from './store/store';
 import bluetoothLeManager from './modules/Bluetooth/BluetoothLeManager';
 import RNLocation from 'react-native-location';
+import Icon from 'react-native-vector-icons/Ionicons'
 import base64 from 'react-native-base64';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faGear } from '@fortawesome/free-solid-svg-icons';
 import { inlineStyles } from 'react-native-svg';
 import { toHtml } from '@fortawesome/fontawesome-svg-core';
+import { createDrawerNavigator } from '@react-navigation/drawer';
 
 // RNLocation.configure({
 //  distanceFilter: null
@@ -123,45 +125,63 @@ const Home: FC = () => {
 
   function HomeScreen() {
     return (
-      <View style={styles.title}>
-        <Text>Home Screen</Text>
-      </View>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.heartRateTitleWrapper}>
+          {isConnected ? (
+            <>
+              <Text style={styles.heartRateTitleText}>Your Pace Is:</Text>
+              <Text style={styles.heartRateText}>{heartRate}</Text>
+            </>
+          ) : (
+            <Text style={styles.heartRateTitleText}>
+              Please Connect to a Arduino Nano BLE 33 {count}
+            </Text>
+          )}
+          {latitude && longitude && (
+            <>
+              <Text>Your Location Is</Text>
+              <Text style={styles.heartRateText}>LAT: {latitude}</Text>
+              <Text style={styles.heartRateText}>LONG: {longitude}</Text>
+            </>
+          )}
+        </View>
+      </SafeAreaView>
     );
   }
-  const Stack = createNativeStackNavigator();
+  const HomeStack = createNativeStackNavigator();
+  const SettingsDrawer = createDrawerNavigator();
+
+  const HomeStackScreen = ({navigation}) => (
+    <HomeStack.Navigator screenOptions={{
+      headerStyle: { backgroundColor: '#F08080' },
+      headerTintColor: '#fff',
+      headerTitleAlign: 'center'
+    }}>
+        <HomeStack.Screen
+          name="HomeScreen"
+          component={HomeScreen}
+          options={{
+            title: 'OpticPace',
+            headerLeft: () => (
+              <Icon.Button 
+                name='settings'
+                size={25}
+                backgroundColor='#F08080'
+                onPress={() => { navigation.openDrawer() }}
+              />
+            )}}/>
+    </HomeStack.Navigator>
+  );
 
   const [myState, setMyState] = useState('');
   const [myHeight, setMyHeight] = useState('');
   return (
     <NavigationContainer>
-      <Stack.Navigator screenOptions={{headerTitleAlign: 'center'}}>
-        <Stack.Screen name="Home" component={HomeScreen} options={{title: 'OpticPace', headerStyle: { backgroundColor: '#F08080' }, headerTintColor: '#fff'}}/>
-      </Stack.Navigator>
+      <SettingsDrawer.Navigator initialRouteName='Home'>
+        <SettingsDrawer.Screen name="Home" component={HomeStackScreen} options={{headerShown: false, headerTitle: 'Home'}}/>
+      </SettingsDrawer.Navigator>
     </NavigationContainer>
     /*<SafeAreaView style={styles.container}>
-      <View style={styles.headerContainer}>
-        <FontAwesomeIcon size={25} color="mediumpurple" icon={faGear}></FontAwesomeIcon>
-        <Text style={styles.appName}>OpticPace</Text>
-      </View>
-      <View style={styles.heartRateTitleWrapper}>
-        {isConnected ? (
-          <>
-            <Text style={styles.heartRateTitleText}>Your Pace Is:</Text>
-            <Text style={styles.heartRateText}>{heartRate}</Text>
-          </>
-        ) : (
-          <Text style={styles.heartRateTitleText}>
-            Please Connect to a Arduino Nano BLE 33 {count}
-          </Text>
-        )}
-        {latitude && longitude && (
-          <>
-            <Text>Your Location Is</Text>
-            <Text style={styles.heartRateText}>LAT: {latitude}</Text>
-            <Text style={styles.heartRateText}>LONG: {longitude}</Text>
-          </>
-        )}
-      </View>
       {isConnected && (
         <TextInput
           placeholder={'placeholder'}
