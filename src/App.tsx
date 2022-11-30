@@ -135,7 +135,7 @@ const Home: FC = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator screenOptions={{headerTitleAlign: 'center'}}>
-        <Stack.Screen name="Home" component={HomeScreen} />
+        <Stack.Screen name="Home" component={HomeScreen} options={{title: 'OpticPace', headerStyle: { backgroundColor: '#F08080' }, headerTintColor: '#fff'}}/>
       </Stack.Navigator>
     </NavigationContainer>
     /*<SafeAreaView style={styles.container}>
