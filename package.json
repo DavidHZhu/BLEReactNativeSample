@@ -15,6 +15,7 @@
     "@fortawesome/react-native-fontawesome": "^0.3.0",
     "@react-native-firebase/analytics": "^16.4.3",
     "@react-native-firebase/app": "^16.4.3",
+    "@react-navigation/drawer": "^6.5.3",
     "@react-navigation/native": "^6.0.13",
     "@react-navigation/native-stack": "^6.9.1",
     "@reduxjs/toolkit": "^1.5.1",
