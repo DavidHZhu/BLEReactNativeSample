@@ -31,6 +31,7 @@ import { faGear } from '@fortawesome/free-solid-svg-icons';
 import { inlineStyles } from 'react-native-svg';
 import { toHtml } from '@fortawesome/fontawesome-svg-core';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import { DrawerContent } from './screens/DrawerContent'
 
 // RNLocation.configure({
 //  distanceFilter: null
@@ -190,7 +191,7 @@ const Home: FC = () => {
   const [myHeight, setMyHeight] = useState('');
   return (
     <NavigationContainer>
-      <SettingsDrawer.Navigator initialRouteName='Home'>
+      <SettingsDrawer.Navigator initialRouteName='Home' drawerContent={ props => <DrawerContent {...props}/> }>
         <SettingsDrawer.Screen name="Home" component={HomeStackScreen} options={{headerShown: false, headerTitle: 'Home'}}/>
       </SettingsDrawer.Navigator>
     </NavigationContainer>
