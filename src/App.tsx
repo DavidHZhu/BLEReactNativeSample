@@ -26,8 +26,6 @@ import bluetoothLeManager from './modules/Bluetooth/BluetoothLeManager';
 import RNLocation from 'react-native-location';
 import Icon from 'react-native-vector-icons/Ionicons'
 import base64 from 'react-native-base64';
-import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faGear } from '@fortawesome/free-solid-svg-icons';
 import { inlineStyles } from 'react-native-svg';
 import { toHtml } from '@fortawesome/fontawesome-svg-core';
 import { createDrawerNavigator } from '@react-navigation/drawer';
