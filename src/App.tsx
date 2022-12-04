@@ -25,10 +25,12 @@ import {RootState, store} from './store/store';
 import bluetoothLeManager from './modules/Bluetooth/BluetoothLeManager';
 import RNLocation from 'react-native-location';
 import Icon from 'react-native-vector-icons/Ionicons'
+import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons'
 import base64 from 'react-native-base64';
 import { inlineStyles } from 'react-native-svg';
 import { toHtml } from '@fortawesome/fontawesome-svg-core';
 import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { DrawerPage} from './screens/DrawerContent'
 
 // RNLocation.configure({
@@ -122,6 +124,14 @@ const Home: FC = () => {
     }
   };
 
+  function MapScreen() {
+    return (
+      <View>
+        <Text>This is for Map</Text>
+      </View>
+    );
+  }
+
   function HomeScreen() {
     return (
       <SafeAreaView style={styles.container}>
@@ -161,7 +171,64 @@ const Home: FC = () => {
     );
   }
   const HomeStack = createNativeStackNavigator();
+  const MapStack = createNativeStackNavigator();
   const SettingsDrawer = createDrawerNavigator();
+  const BottomTab = createBottomTabNavigator();
+
+  function TabScreen() {
+    return (
+      <BottomTab.Navigator initialRouteName='Home' screenOptions={{
+        tabBarActiveTintColor: "black",
+        tabBarInactiveBackgroundColor: "lightblue",
+        tabBarActiveBackgroundColor: "lightblue",
+      }}>
+        <BottomTab.Screen name="HomeTab" component={HomeStackScreen} options={{
+          headerShown: false,
+          tabBarLabel: "Home",
+          tabBarIcon: ({color, size}) => (
+            <Icon
+              name="home-sharp"
+              color={color}
+              size={size}
+            />
+          ),
+        }}/>
+        <BottomTab.Screen name="MapTab" component={MapStackScreen} options={{
+          headerShown: false,
+          tabBarLabel: "Map",
+          tabBarIcon: ({color, size}) => (
+            <MaterialIcon
+              name="google-maps"
+              color={color}
+              size={30}
+            />
+          ),
+        }}/>
+      </BottomTab.Navigator>
+    );
+  }
+
+  const MapStackScreen = ({navigation}) => (
+    <MapStack.Navigator screenOptions={{
+      headerStyle: { backgroundColor: '#F08080' },
+      headerTintColor: '#fff',
+      headerTitleAlign: 'center'
+    }}>
+        <MapStack.Screen
+          name="MapScreen"
+          component={MapScreen}
+          options={{
+            title: 'OpticPace',
+            headerLeft: () => (
+              <Icon.Button 
+                name='settings'
+                size={25}
+                backgroundColor='#F08080'
+                onPress={() => { navigation.openDrawer() }}
+              />
+            )}}/>
+    </MapStack.Navigator>
+  );
 
   const HomeStackScreen = ({navigation}) => (
     <HomeStack.Navigator screenOptions={{
@@ -190,7 +257,7 @@ const Home: FC = () => {
   return (
     <NavigationContainer>
       <SettingsDrawer.Navigator initialRouteName='Home' drawerContent={ props => <DrawerPage {...props}/> }>
-        <SettingsDrawer.Screen name="Home" component={HomeStackScreen} options={{headerShown: false, headerTitle: 'Home'}}/>
+        <SettingsDrawer.Screen name="Home" component={TabScreen} options={{headerShown: false, headerTitle: 'Home'}}/>
       </SettingsDrawer.Navigator>
     </NavigationContainer>
     /*<SafeAreaView style={styles.container}>

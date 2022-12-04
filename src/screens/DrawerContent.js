@@ -20,10 +20,10 @@ import { faUser } from '@fortawesome/free-solid-svg-icons';
 
 export function DrawerPage(props){
     const [connectBluetooth, setConnectBluetooth] = React.useState(false);
-    const [isDuration, setIsDuration] = React.useState(false);
-    const [isCurrentPace, setIsCurrentPace] = React.useState(false);
-    const [isAveragePace, setIsAveragePace] = React.useState(false);
-    const [isKilometers, setIsKilometers] = React.useState(false);
+    const [isDuration, setIsDuration] = React.useState(true);
+    const [isCurrentPace, setIsCurrentPace] = React.useState(true);
+    const [isAveragePace, setIsAveragePace] = React.useState(true);
+    const [isKilometers, setIsKilometers] = React.useState(true);
 
     const toggleTheme = () => {
         setConnectBluetooth(!connectBluetooth);
@@ -61,28 +61,28 @@ export function DrawerPage(props){
                     </View>
                     <Drawer.Section style={styles.drawerSection}>
                         <DrawerItem
-                            icon={({color, size}) => (
+                            icon={({size}) => (
                                 <Icon
-                                name="home-outline"
-                                color="black"
-                                size={size}
+                                    name="home-outline"
+                                    color="black"
+                                    size={size}
                                 />
                             )}
                             style={{ backgroundColor: '#8c92ac' }}
                             label="Home"
-                            onPress={() => {}}
+                            onPress={() => {props.navigation.navigate("Home", {screen: "HomeTab"})}}
                         />
                         <DrawerItem
-                            icon={({color, size}) => (
+                            icon={({size}) => (
                                 <Icon
-                                name="map"
-                                color="black"
-                                size={size}
+                                    name="map"
+                                    color="black"
+                                    size={size}
                                 />
                             )}
                             style={{ backgroundColor: '#8c92ac' }}
                             label="Map"
-                            onPress={() => {}}
+                            onPress={() => {props.navigation.navigate("Home", {screen: "MapTab"})}}
                         />
                     </Drawer.Section>
                     <Drawer.Section style={{paddingBottom: 10}}>
@@ -107,38 +107,40 @@ export function DrawerPage(props){
                         <View style={{flexDirection: 'row', marginLeft: 80}}>
                             <Text style={{marginTop: 10, fontSize: 15, color: 'black', marginBottom: 10}}>Display Settings</Text>
                         </View>
-                        <TouchableRipple onPress={() => {toggleDuration()}}>
-                            <View style={styles.preference}>
-                                <Text>DURATION</Text>
-                                <View pointerEvents="none">
-                                    <Switch value={isDuration}/>
+                        <View style={styles.displaySettings}>
+                            <TouchableRipple onPress={() => {toggleDuration()}}>
+                                <View style={styles.preference}>
+                                    <Text>DURATION</Text>
+                                    <View pointerEvents="none">
+                                        <Switch value={isDuration}/>
+                                    </View>
                                 </View>
-                            </View>
-                        </TouchableRipple>
-                        <TouchableRipple onPress={() => {toggleAveragePace()}}>
-                            <View style={styles.preference}>
-                                <Text>AVERAGE PACE</Text>
-                                <View pointerEvents="none">
-                                    <Switch value={isAveragePace}/>
+                            </TouchableRipple>
+                            <TouchableRipple onPress={() => {toggleAveragePace()}}>
+                                <View style={styles.preference}>
+                                    <Text>AVERAGE PACE</Text>
+                                    <View pointerEvents="none">
+                                        <Switch value={isAveragePace}/>
+                                    </View>
                                 </View>
-                            </View>
-                        </TouchableRipple>
-                        <TouchableRipple onPress={() => {toggleCurrentPace()}}>
-                            <View style={styles.preference}>
-                                <Text>CURRENT PACE</Text>
-                                <View pointerEvents="none">
-                                    <Switch value={isCurrentPace}/>
+                            </TouchableRipple>
+                            <TouchableRipple onPress={() => {toggleCurrentPace()}}>
+                                <View style={styles.preference}>
+                                    <Text>CURRENT PACE</Text>
+                                    <View pointerEvents="none">
+                                        <Switch value={isCurrentPace}/>
+                                    </View>
                                 </View>
-                            </View>
-                        </TouchableRipple>
-                        <TouchableRipple onPress={() => {toggleKilometers()}}>
-                            <View style={styles.preference}>
-                                <Text>KILOMETERS</Text>
-                                <View pointerEvents="none">
-                                    <Switch value={isKilometers}/>
+                            </TouchableRipple>
+                            <TouchableRipple onPress={() => {toggleKilometers()}}>
+                                <View style={styles.preference}>
+                                    <Text>KILOMETERS</Text>
+                                    <View pointerEvents="none">
+                                        <Switch value={isKilometers}/>
+                                    </View>
                                 </View>
-                            </View>
-                        </TouchableRipple>
+                            </TouchableRipple>
+                        </View>
                     </Drawer.Section>
                 </View>
             </DrawerContentScrollView>
@@ -195,8 +197,9 @@ const styles = StyleSheet.create({
     },
     bottomDrawerSection: {
         marginBottom: 15,
-        borderTopColor: '#f4f4f4',
-        borderTopWidth: 1,
+    },
+    displaySettings: {
+        marginBottom: 20,
     },
     bluetoothPreference: {
         flexDirection: 'column',
