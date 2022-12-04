@@ -128,6 +128,7 @@ const Home: FC = () => {
     return (
       <View>
         <Text>This is for Map</Text>
+        <Text>Here is the Map</Text>
       </View>
     );
   }
