@@ -127,8 +127,7 @@ const Home: FC = () => {
   function MapScreen() {
     return (
       <View>
-        <Text>This is for Map</Text>
-        <Text>Here is the Map</Text>
+        <Text>This is for checking map</Text>
       </View>
     );
   }
