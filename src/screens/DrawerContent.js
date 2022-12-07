@@ -16,7 +16,7 @@ import {
 } from 'react-native-paper'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-import { faUser } from '@fortawesome/free-solid-svg-icons';
+import { faCircleUser } from '@fortawesome/free-solid-svg-icons';
 
 export function DrawerPage(props){
     const [connectBluetooth, setConnectBluetooth] = React.useState(false);
@@ -52,7 +52,7 @@ export function DrawerPage(props){
                 <View style={styles.drawerContent}>
                     <View style={styles.userInfoSection}>
                         <View style={{marginTop: 15}}>
-                            <FontAwesomeIcon icon={faUser} size={50} style={styles.profilePicture}/>
+                            <FontAwesomeIcon icon={faCircleUser} size={50} style={styles.profilePicture}/>
                             <View style={{flexDirection: 'column', marginLeft: 76}}>
                                 <Title style={styles.title}>GuestName</Title>
                                 <Caption style={styles.caption}>GuestEmail</Caption>
@@ -171,12 +171,13 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 16,
         marginTop: 3,
+        marginLeft: 1,
         fontWeight: 'normal',
     },
     caption: {
         fontSize: 14,
         lineHeight: 14,
-        marginLeft: 4,
+        marginLeft: 5,
     },
     row: {
         marginTop: 20,
@@ -217,8 +218,8 @@ const styles = StyleSheet.create({
         
     },
     profilePicture: {
-        marginLeft: 90,
-        marginBottom: 15,
+        marginLeft: 95,
+        marginBottom: 5,
     },
     blueTooth: {
         marginTop: 10,

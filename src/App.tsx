@@ -11,7 +11,7 @@ import 'react-native-gesture-handler';
 import React, {FC, useState} from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import {SafeAreaView, StyleSheet, Text, View, TextInput} from 'react-native';
+import {SafeAreaView, StyleSheet, Text, View, TextInput, TouchableOpacity} from 'react-native';
 import {Provider, useDispatch, useSelector} from 'react-redux';
 import CTAButton from './components/CTAButton';
 import DeviceModal from './components/DeviceConnectionModal';
@@ -29,6 +29,11 @@ import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons'
 import base64 from 'react-native-base64';
 import { inlineStyles } from 'react-native-svg';
 import { toHtml } from '@fortawesome/fontawesome-svg-core';
+import {
+  Banner,
+  Divider,
+  IconButton
+} from 'react-native-paper'
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { DrawerPage} from './screens/DrawerContent'
@@ -136,7 +141,50 @@ const Home: FC = () => {
   function HomeScreen() {
     return (
       <SafeAreaView style={styles.container}>
-        <View style={styles.heartRateTitleWrapper}>
+        <View style={{alignItems: 'center', marginTop: 15}}>
+          <MaterialIcon name="run-fast" size={40}/>
+        </View>
+        <View style={{flexDirection: 'column'}}>
+          <View style={{marginTop: 10, marginLeft: 15, marginRight: 15, borderBottomWidth: 2, borderBottomColor: '#F08080'}}>
+            <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 5, color: '#E9967A'}}>Duration</Text>
+            <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 10}}>00:00</Text>
+          </View>
+          <View style={{marginLeft: 15, marginRight: 15, borderBottomWidth: 2, borderBottomColor: '#F08080', flexDirection: 'row', alignContent: 'center', alignItems: 'center', justifyContent: 'space-evenly'}}>
+            <View>
+              <Text style={{textAlign: 'center', fontSize: 25, marginBottom: 15, marginTop: 15, color: '#E9967A'}}>Current Pace</Text>
+              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 10}}>0</Text>
+              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 20}}>km/h</Text>
+            </View>
+            <View style={{height: '80%', width: 1.5, backgroundColor: '#F08080'}}></View>
+            <View>
+              <Text style={{textAlign: 'center', fontSize: 25, marginBottom: 15, marginTop: 15, color: '#E9967A'}}>Average Pace</Text>
+              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 10}}>0</Text>
+              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 20}}>km/h</Text>
+            </View>
+          </View>
+          <View style={{marginTop: 15, marginBottom: 15}}>
+            <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 5, color: '#E9967A'}}>Distance</Text>
+            <Text style={{textAlign: 'center', fontSize: 35}}>0 km</Text>
+          </View>
+        </View>
+        <View style={{flexDirection: 'row', alignContent: 'center', alignItems: 'center', justifyContent: 'space-evenly', marginTop: 20}}>
+          <View>
+            <TouchableOpacity onPress={()=>{}} style={{backgroundColor: '#67AE33', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
+              <Icon name='play-circle-outline' size={30} color="white"/>
+            </TouchableOpacity>
+          </View>
+          <View>
+            <TouchableOpacity onPress={()=>{}} style={{backgroundColor: '#67AE33', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
+              <Icon name='pause-circle-outline' size={30} color="white"/>
+            </TouchableOpacity>
+          </View>
+          <View>
+            <TouchableOpacity onPress={()=>{}} style={{backgroundColor: '#E73415', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
+              <Icon name='stop-circle-outline' size={30} color="white"/>
+            </TouchableOpacity>
+          </View>
+        </View>
+     {/*   <View style={styles.heartRateTitleWrapper}>
           {isConnected ? (
             <>
               <Text style={styles.heartRateTitleText}>Your Pace Is:</Text>
@@ -167,8 +215,8 @@ const Home: FC = () => {
             onChangeText={text => setMyHeight(text)}
             style={styles.input}
           />
-        )}
-      </SafeAreaView>
+        )}*/}
+        </SafeAreaView>
     );
   }
   const HomeStack = createNativeStackNavigator();
