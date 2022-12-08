@@ -60,6 +60,30 @@ const Home: FC = () => {
   const [count, setCount] = useState(0);
   const [latitude, setLatitude] = useState(0 || null);
   const [longitude, setLongitude] = useState(0 || null);
+  const [isDuration, setIsDuration] = useState(true);
+  const [isCurrentPace, setIsCurrentPace] = useState(true);
+  const [isAveragePace, setIsAveragePace] = useState(true);
+  const [isKilometers, setIsKilometers] = useState(true);
+
+  const toggleDuration = () => {
+    setIsDuration(!isDuration);
+
+  }
+
+  const toggleCurrentPace = () => {
+    setIsCurrentPace(!isCurrentPace);
+
+  }
+
+  const toggleAveragePace = () => {
+    setIsAveragePace(!isAveragePace);
+
+  }
+
+  const toggleKilometers = () => {
+    setIsKilometers(!isKilometers);
+  }
+
   const devices = useSelector(
     (state: RootState) => state.bluetooth.availableDevices,
   );
@@ -145,27 +169,27 @@ const Home: FC = () => {
           <MaterialIcon name="run-fast" size={40}/>
         </View>
         <View style={{flexDirection: 'column'}}>
-          <View style={{marginTop: 10, marginLeft: 15, marginRight: 15, borderBottomWidth: 2, borderBottomColor: '#F08080'}}>
+          {isDuration && <View style={{marginTop: 10, marginLeft: 15, marginRight: 15, borderBottomWidth: 2, borderBottomColor: '#F08080'}}>
             <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 5, color: '#E9967A'}}>Duration</Text>
             <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 10}}>00:00</Text>
-          </View>
-          <View style={{marginLeft: 15, marginRight: 15, borderBottomWidth: 2, borderBottomColor: '#F08080', flexDirection: 'row', alignContent: 'center', alignItems: 'center', justifyContent: 'space-evenly'}}>
-            <View>
+          </View>}
+          {(isAveragePace || isCurrentPace) && <View style={{marginLeft: 15, marginRight: 15, borderBottomWidth: 2, borderBottomColor: '#F08080', flexDirection: 'row', alignContent: 'center', alignItems: 'center', justifyContent: 'space-evenly'}}>
+            {isCurrentPace && <View>
               <Text style={{textAlign: 'center', fontSize: 25, marginBottom: 15, marginTop: 15, color: '#E9967A'}}>Current Pace</Text>
               <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 10}}>0</Text>
               <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 20}}>km/h</Text>
-            </View>
-            <View style={{height: '80%', width: 1.5, backgroundColor: '#F08080'}}></View>
-            <View>
+            </View>}
+            {isCurrentPace && isAveragePace && <View style={{height: '80%', width: 1.5, backgroundColor: '#F08080'}}></View>}
+            {isAveragePace && <View>
               <Text style={{textAlign: 'center', fontSize: 25, marginBottom: 15, marginTop: 15, color: '#E9967A'}}>Average Pace</Text>
               <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 10}}>0</Text>
               <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 20}}>km/h</Text>
-            </View>
-          </View>
-          <View style={{marginTop: 15, marginBottom: 15}}>
+            </View>}
+          </View>}
+          {isKilometers && <View style={{marginTop: 15, marginBottom: 15, marginLeft: 15, marginRight: 15, borderBottomWidth: 2, borderBottomColor: '#F08080'}}>
             <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 5, color: '#E9967A'}}>Distance</Text>
-            <Text style={{textAlign: 'center', fontSize: 35}}>0 km</Text>
-          </View>
+            <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 10}}>0 km</Text>
+          </View>}
         </View>
         <View style={{flexDirection: 'row', alignContent: 'center', alignItems: 'center', justifyContent: 'space-evenly', marginTop: 20}}>
           <View>
@@ -182,7 +206,7 @@ const Home: FC = () => {
             <TouchableOpacity onPress={()=>{}} style={{backgroundColor: '#E73415', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
               <Icon name='stop-circle-outline' size={30} color="white"/>
             </TouchableOpacity>
-          </View>
+            </View>
         </View>
      {/*   <View style={styles.heartRateTitleWrapper}>
           {isConnected ? (
@@ -305,8 +329,17 @@ const Home: FC = () => {
   const [myHeight, setMyHeight] = useState('');
   return (
     <NavigationContainer>
-      <SettingsDrawer.Navigator initialRouteName='Home' drawerContent={ props => <DrawerPage {...props}/> }>
-        <SettingsDrawer.Screen name="Home" component={TabScreen} options={{headerShown: false, headerTitle: 'Home'}}/>
+      <SettingsDrawer.Navigator initialRouteName='Home' drawerContent={ props => <DrawerPage {...props}
+        showAveragePace={isAveragePace}
+        showCurrentPace={isCurrentPace}
+        showDuration={isDuration}
+        showKilometers={isKilometers}
+        toggleShowAveragePace={toggleAveragePace}
+        toggleShowCurrentPace={toggleCurrentPace}
+        toggleShowDuration={toggleDuration}
+        toggleShowKilometers={toggleKilometers}
+      />}>
+          <SettingsDrawer.Screen name="Home" component={TabScreen} options={{headerShown: false, headerTitle: 'Home'}}/>
       </SettingsDrawer.Navigator>
     </NavigationContainer>
     /*<SafeAreaView style={styles.container}>

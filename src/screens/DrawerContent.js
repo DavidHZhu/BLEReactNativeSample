@@ -20,29 +20,9 @@ import { faCircleUser } from '@fortawesome/free-solid-svg-icons';
 
 export function DrawerPage(props){
     const [connectBluetooth, setConnectBluetooth] = React.useState(false);
-    const [isDuration, setIsDuration] = React.useState(true);
-    const [isCurrentPace, setIsCurrentPace] = React.useState(true);
-    const [isAveragePace, setIsAveragePace] = React.useState(true);
-    const [isKilometers, setIsKilometers] = React.useState(true);
 
     const toggleTheme = () => {
         setConnectBluetooth(!connectBluetooth);
-    
-    }
-    const toggleDuration = () => {
-        setIsDuration(!isDuration);
-    
-    }
-    const toggleCurrentPace = () => {
-        setIsCurrentPace(!isCurrentPace);
-    
-    }
-    const toggleAveragePace = () => {
-        setIsAveragePace(!isAveragePace);
-    
-    }
-    const toggleKilometers = () => {
-        setIsKilometers(!isKilometers);
     
     }
 
@@ -108,35 +88,35 @@ export function DrawerPage(props){
                             <Text style={{marginTop: 10, fontSize: 15, color: 'black', marginBottom: 10}}>Display Settings</Text>
                         </View>
                         <View style={styles.displaySettings}>
-                            <TouchableRipple onPress={() => {toggleDuration()}}>
+                            <TouchableRipple onPress={() => {props.toggleShowDuration()}}>
                                 <View style={styles.preference}>
                                     <Text>DURATION</Text>
                                     <View pointerEvents="none">
-                                        <Switch value={isDuration}/>
+                                        <Switch value={props.showDuration}/>
                                     </View>
                                 </View>
                             </TouchableRipple>
-                            <TouchableRipple onPress={() => {toggleAveragePace()}}>
+                            <TouchableRipple onPress={() => {props.toggleShowAveragePace()}}>
                                 <View style={styles.preference}>
                                     <Text>AVERAGE PACE</Text>
                                     <View pointerEvents="none">
-                                        <Switch value={isAveragePace}/>
+                                        <Switch value={props.showAveragePace}/>
                                     </View>
                                 </View>
                             </TouchableRipple>
-                            <TouchableRipple onPress={() => {toggleCurrentPace()}}>
+                            <TouchableRipple onPress={() => {props.toggleShowCurrentPace()}}>
                                 <View style={styles.preference}>
                                     <Text>CURRENT PACE</Text>
                                     <View pointerEvents="none">
-                                        <Switch value={isCurrentPace}/>
+                                        <Switch value={props.showCurrentPace}/>
                                     </View>
                                 </View>
                             </TouchableRipple>
-                            <TouchableRipple onPress={() => {toggleKilometers()}}>
+                            <TouchableRipple onPress={() => {props.toggleShowKilometers()}}>
                                 <View style={styles.preference}>
                                     <Text>KILOMETERS</Text>
                                     <View pointerEvents="none">
-                                        <Switch value={isKilometers}/>
+                                        <Switch value={props.showKilometers}/>
                                     </View>
                                 </View>
                             </TouchableRipple>
