@@ -36,7 +36,8 @@ import {
 } from 'react-native-paper'
 import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { DrawerPage} from './screens/DrawerContent'
+import { DrawerPage} from './screens/DrawerContent';
+import { AuthStackScreen } from './screens/AuthenticationStack';
 
 // RNLocation.configure({
 //  distanceFilter: null
@@ -329,7 +330,8 @@ const Home: FC = () => {
   const [myHeight, setMyHeight] = useState('');
   return (
     <NavigationContainer>
-      <SettingsDrawer.Navigator initialRouteName='Home' drawerContent={ props => <DrawerPage {...props}
+      <AuthStackScreen/>
+      {/*<SettingsDrawer.Navigator initialRouteName='Home' drawerContent={ props => <DrawerPage {...props}
         showAveragePace={isAveragePace}
         showCurrentPace={isCurrentPace}
         showDuration={isDuration}
@@ -340,7 +342,7 @@ const Home: FC = () => {
         toggleShowKilometers={toggleKilometers}
       />}>
           <SettingsDrawer.Screen name="Home" component={TabScreen} options={{headerShown: false, headerTitle: 'Home'}}/>
-      </SettingsDrawer.Navigator>
+  </SettingsDrawer.Navigator>*/}
     </NavigationContainer>
     /*<SafeAreaView style={styles.container}>
       {isConnected && (
