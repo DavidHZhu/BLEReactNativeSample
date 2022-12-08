@@ -330,7 +330,8 @@ const Home: FC = () => {
   const [myHeight, setMyHeight] = useState('');
   return (
     <NavigationContainer>
-      <AuthStackScreen/>
+      <AuthStackScreen>
+      </AuthStackScreen>
       {/*<SettingsDrawer.Navigator initialRouteName='Home' drawerContent={ props => <DrawerPage {...props}
         showAveragePace={isAveragePace}
         showCurrentPace={isCurrentPace}
