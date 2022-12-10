@@ -55,7 +55,7 @@ const SignInScreen = () => {
     return(
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.textHeader}>Welcome to OpticPace</Text>
+                <Text style={styles.textHeader}>Welcome to OpticPace App</Text>
             </View>
             <View style={styles.footer}>
                 <Text style={styles.textFooter}>Email</Text>
