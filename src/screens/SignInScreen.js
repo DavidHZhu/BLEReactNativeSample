@@ -7,13 +7,18 @@ import {
     Dimensions,
     StyleSheet,
     Platform,
-    TextInput
+    TextInput,
+    StatusBar
 } from 'react-native';
-import FontAwesome from 'react-native-vector-icons/FontAwesome'
-import Feather from 'react-native-vector-icons/Feather'
-import { ScreenStackHeaderBackButtonImage } from "react-native-screens";
+import FontAwesome from 'react-native-vector-icons/FontAwesome';
+import Feather from 'react-native-vector-icons/Feather';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
+import * as Animatable from 'react-native-animatable';
+import LinearGradient from "react-native-linear-gradient";
+import { BounceIn } from "react-native-reanimated";
 
-const SignInScreen = () => {
+
+const SignInScreen = ({navigation}) => {
 
     const [info, setInfo] = React.useState({
         email: '',
@@ -54,10 +59,14 @@ const SignInScreen = () => {
 
     return(
         <View style={styles.container}>
+            <StatusBar backgroundColor="#5882FA" barStyle="light-content"/>
             <View style={styles.header}>
-                <Text style={styles.textHeader}>Welcome to OpticPace</Text>
+                <View style={{alignItems: "center", paddingBottom: 25}}>
+                    <MaterialIcons name="run-circle" size={70} color="white"/>
+                </View>
+                <Text style={styles.textHeader}>Welcome to OpticPace!</Text>
             </View>
-            <View style={styles.footer}>
+            <Animatable.View style={styles.footer} animation="fadeInUpBig">
                 <Text style={styles.textFooter}>Email</Text>
                 <View style={styles.action}>
                     <FontAwesome 
@@ -71,11 +80,14 @@ const SignInScreen = () => {
                         autoCapitalize="none"
                         onChangeText={(value) => {handleInputChange(value)}}
                     />
-                    {info.checkInputChange && <Feather
-                        name="check-circle"
-                        color="green"
-                        size={20}
-                    />}
+                    {info.checkInputChange &&
+                    <Animatable.View animation="tada">
+                        <Feather
+                            name="check-circle"
+                            color="green"
+                            size={20}
+                        />
+                    </Animatable.View>}
                 </View>
                 <Text style={{color: '#05375a', fontSize: 18, marginTop: 35}}>Password</Text>
                 <View style={styles.action}>
@@ -85,7 +97,7 @@ const SignInScreen = () => {
                         size={20}
                     />
                     <TextInput
-                        placeholder="Your Email"
+                        placeholder="Your Password"
                         style={styles.textInputField}
                         autoCapitalize="none"
                         secureTextEntry={info.secureEntry}
@@ -108,9 +120,20 @@ const SignInScreen = () => {
                     </TouchableOpacity>
                 </View>
                 <View style={styles.button}>
+                    <LinearGradient
+                        colors={['#4E78F0', '#5882FA']}
+                        style={styles.signIn}
+                    >
                         <Text style={styles.textSign}>Sign In</Text>
+                    </LinearGradient>
+                    <TouchableOpacity 
+                        onPress={() => {navigation.navigate("SignUpScreen")}}
+                        style={styles.signUp}
+                    >
+                        <Text style={styles.textSignUp}>Sign Up</Text>
+                    </TouchableOpacity>
                 </View>
-            </View>
+            </Animatable.View>
         </View>
     );
 };
@@ -120,12 +143,12 @@ export default SignInScreen;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#009387',
+        backgroundColor: '#5882FA',
     },
     header:{
         flex: 1,
-        marginBottom: 30,
-        marginLeft: 10,
+        marginBottom: 25,
+        marginLeft: 5,
         justifyContent: "flex-end",
     },
     footer: {
@@ -139,7 +162,7 @@ const styles = StyleSheet.create({
     textHeader: {
         color: '#fff',
         fontWeight: 'bold',
-        fontSize: 25,
+        fontSize: 23,
     },
     textFooter:{
         color: '#05375a',
@@ -169,9 +192,24 @@ const styles = StyleSheet.create({
         alignItems: "center",
         borderRadius: 10
     },
+    signUp: {
+        width: '100%',
+        height: 50,
+        justifyContent: "center",
+        alignItems: "center",
+        borderRadius: 10,
+        borderColor:'#5882FA',
+        borderWidth: 1,
+        marginTop: 10,
+    },
     textSign: {
         fontWeight: 'bold',
         fontSize: 18,
         color: '#fff'
+    },
+    textSignUp: {
+        fontWeight: 'bold',
+        fontSize: 18,
+        color: '#5882FA'
     }
 })
