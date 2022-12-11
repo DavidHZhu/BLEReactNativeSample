@@ -65,7 +65,26 @@ const Home: FC = () => {
   const [isCurrentPace, setIsCurrentPace] = useState(true);
   const [isAveragePace, setIsAveragePace] = useState(true);
   const [isKilometers, setIsKilometers] = useState(true);
+  const [buttonInfo, setButtonInfo] = React.useState({
+    startButton: true,
+    pauseButton: false,
+    stopButton: false,
+});
 
+  const toggleStartPauseButton = () => {
+    setButtonInfo({
+      startButton: !buttonInfo.startButton,
+      pauseButton: !buttonInfo.pauseButton,
+      stopButton: buttonInfo.stopButton === false ? true : buttonInfo.stopButton
+    });
+  }
+  const stopButton = () => {
+    setButtonInfo({
+      startButton: true,
+      pauseButton: false,
+      stopButton: false,
+    });
+  }
   const toggleDuration = () => {
     setIsDuration(!isDuration);
 
@@ -209,21 +228,21 @@ const Home: FC = () => {
           </View>}
         </View>
         <View style={{flexDirection: 'row', alignContent: 'center', alignItems: 'center', justifyContent: 'space-evenly', marginTop: 20}}>
-          <View>
-            <TouchableOpacity onPress={()=>{}} style={{backgroundColor: '#67AE33', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
+          {buttonInfo.startButton && <View>
+            <TouchableOpacity onPress={()=>{toggleStartPauseButton()}} style={{backgroundColor: '#67AE33', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
               <Icon name='play-circle-outline' size={30} color="white"/>
             </TouchableOpacity>
-          </View>
-          <View>
-            <TouchableOpacity onPress={()=>{}} style={{backgroundColor: '#67AE33', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
+          </View>}
+          {buttonInfo.pauseButton && <View>
+            <TouchableOpacity onPress={()=>{toggleStartPauseButton()}} style={{backgroundColor: '#67AE33', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
               <Icon name='pause-circle-outline' size={30} color="white"/>
             </TouchableOpacity>
-          </View>
-          <View>
-            <TouchableOpacity onPress={()=>{}} style={{backgroundColor: '#E73415', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
+          </View>}
+          {buttonInfo.stopButton && <View>
+            <TouchableOpacity onPress={()=>{stopButton()}} style={{backgroundColor: '#E73415', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
               <Icon name='stop-circle-outline' size={30} color="white"/>
             </TouchableOpacity>
-            </View>
+            </View>}
         </View>
      {/*   <View style={styles.heartRateTitleWrapper}>
           {isConnected ? (
