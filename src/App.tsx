@@ -156,10 +156,26 @@ const Home: FC = () => {
 
   function MapScreen() {
     return (
+      <SafeAreaView style={styles.container}>
       <View>
-        <Text>This is for checking map</Text>
-        <Text>Here it is</Text>
-      </View>
+          <Text style={{textAlign: 'center', marginBottom: 50}}>Map Page</Text>
+          {true && (
+            <CTAButton
+              title="GET GPS LOCATION"
+              onPress={() => {
+                getLocation();
+              }}
+            />
+          )}
+          {latitude && longitude && (
+            <>
+              <Text>Your Location Is</Text>
+              <Text style={styles.heartRateText}>LAT: {latitude}</Text>
+              <Text style={styles.heartRateText}>LONG: {longitude}</Text>
+            </>
+          )}
+        </View>
+      </SafeAreaView>
     );
   }
 
@@ -219,13 +235,6 @@ const Home: FC = () => {
             <Text style={styles.heartRateTitleText}>
               Please Connect to a Arduino Nano BLE 33 {count}
             </Text>
-          )}
-          {latitude && longitude && (
-            <>
-              <Text>Your Location Is</Text>
-              <Text style={styles.heartRateText}>LAT: {latitude}</Text>
-              <Text style={styles.heartRateText}>LONG: {longitude}</Text>
-            </>
           )}
         </View>
         {isConnected && (
@@ -330,8 +339,8 @@ const Home: FC = () => {
   const [myHeight, setMyHeight] = useState('');
   return (
     <NavigationContainer>
-      <AuthStackScreen/>
-      {/*<SettingsDrawer.Navigator initialRouteName='Home' drawerContent={ props => <DrawerPage {...props}
+      {/*<AuthStackScreen/>*/}
+      <SettingsDrawer.Navigator initialRouteName='Home' drawerContent={ props => <DrawerPage {...props}
         showAveragePace={isAveragePace}
         showCurrentPace={isCurrentPace}
         showDuration={isDuration}
@@ -341,8 +350,8 @@ const Home: FC = () => {
         toggleShowDuration={toggleDuration}
         toggleShowKilometers={toggleKilometers}
       />}>
-          <SettingsDrawer.Screen name="Home" component={TabScreen} options={{headerShown: false, headerTitle: 'Home'}}/>
-  </SettingsDrawer.Navigator>*/}
+        <SettingsDrawer.Screen name="Home" component={TabScreen} options={{headerShown: false, headerTitle: 'Home'}}/>
+      </SettingsDrawer.Navigator>
     </NavigationContainer>
     /*<SafeAreaView style={styles.container}>
       {isConnected && (
@@ -403,14 +412,6 @@ const Home: FC = () => {
           title="RESET"
           onPress={() => {
             bluetoothLeManager.sendBLEWriteReset();
-          }}
-        />
-      )}
-      {true && (
-        <CTAButton
-          title="GET GPS LOCATION"
-          onPress={() => {
-            getLocation();
           }}
         />
       )}

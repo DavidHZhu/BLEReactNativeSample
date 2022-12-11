@@ -148,7 +148,6 @@ const styles = StyleSheet.create({
     header:{
         flex: 1,
         marginBottom: 25,
-        marginLeft: 5,
         justifyContent: "flex-end",
     },
     footer: {
@@ -163,6 +162,7 @@ const styles = StyleSheet.create({
         color: '#fff',
         fontWeight: 'bold',
         fontSize: 23,
+        marginLeft: 15
     },
     textFooter:{
         color: '#05375a',
