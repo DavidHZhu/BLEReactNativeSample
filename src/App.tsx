@@ -205,7 +205,7 @@ const Home: FC = () => {
           <MaterialIcon name="run-fast" size={40}/>
         </View>
         <View style={{flexDirection: 'column'}}>
-          {isDuration && <View style={{marginTop: 10, marginLeft: 15, marginRight: 15, borderBottomWidth: 2, borderBottomColor: '#F08080'}}>
+          {isDuration && <View style={{marginTop: 10, marginLeft: 15, marginRight: 15, borderWidth: 2, borderRadius: 10, borderColor: '#F08080'}}>
             <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 5, color: '#E9967A'}}>Duration</Text>
             <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 10}}>00:00</Text>
           </View>}
