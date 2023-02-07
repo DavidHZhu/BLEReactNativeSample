@@ -7,9 +7,11 @@
  *
  * @format
  */
-
+import 'react-native-gesture-handler';
 import React, {FC, useState} from 'react';
-import {SafeAreaView, StyleSheet, Text, View, TextInput} from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import {SafeAreaView, StyleSheet, Text, View, TextInput, TouchableOpacity} from 'react-native';
 import {Provider, useDispatch, useSelector} from 'react-redux';
 import CTAButton from './components/CTAButton';
 import DeviceModal from './components/DeviceConnectionModal';
@@ -22,7 +24,20 @@ import {
 import {RootState, store} from './store/store';
 import bluetoothLeManager from './modules/Bluetooth/BluetoothLeManager';
 import RNLocation from 'react-native-location';
+import Icon from 'react-native-vector-icons/Ionicons'
+import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons'
 import base64 from 'react-native-base64';
+import { inlineStyles } from 'react-native-svg';
+import { toHtml } from '@fortawesome/fontawesome-svg-core';
+import {
+  Banner,
+  Divider,
+  IconButton
+} from 'react-native-paper'
+import { createDrawerNavigator } from '@react-navigation/drawer';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { DrawerPage} from './screens/DrawerContent';
+import AuthStackScreen from './screens/AuthenticationStack';
 
 // RNLocation.configure({
 //  distanceFilter: null
@@ -46,6 +61,49 @@ const Home: FC = () => {
   const [count, setCount] = useState(0);
   const [latitude, setLatitude] = useState(0 || null);
   const [longitude, setLongitude] = useState(0 || null);
+  const [isDuration, setIsDuration] = useState(true);
+  const [isCurrentPace, setIsCurrentPace] = useState(true);
+  const [isAveragePace, setIsAveragePace] = useState(true);
+  const [isKilometers, setIsKilometers] = useState(true);
+  const [buttonInfo, setButtonInfo] = React.useState({
+    startButton: true,
+    pauseButton: false,
+    stopButton: false,
+});
+
+  const toggleStartPauseButton = () => {
+    setButtonInfo({
+      startButton: !buttonInfo.startButton,
+      pauseButton: !buttonInfo.pauseButton,
+      stopButton: buttonInfo.stopButton === false ? true : buttonInfo.stopButton
+    });
+  }
+  const stopButton = () => {
+    setButtonInfo({
+      startButton: true,
+      pauseButton: false,
+      stopButton: false,
+    });
+  }
+  const toggleDuration = () => {
+    setIsDuration(!isDuration);
+
+  }
+
+  const toggleCurrentPace = () => {
+    setIsCurrentPace(!isCurrentPace);
+
+  }
+
+  const toggleAveragePace = () => {
+    setIsAveragePace(!isAveragePace);
+
+  }
+
+  const toggleKilometers = () => {
+    setIsKilometers(!isKilometers);
+  }
+
   const devices = useSelector(
     (state: RootState) => state.bluetooth.availableDevices,
   );
@@ -115,29 +173,206 @@ const Home: FC = () => {
     }
   };
 
+  function MapScreen() {
+    return (
+      <SafeAreaView style={styles.container}>
+      <View>
+          <Text style={{textAlign: 'center', marginBottom: 50}}>Map Page</Text>
+          {true && (
+            <CTAButton
+              title="GET GPS LOCATION"
+              onPress={() => {
+                getLocation();
+              }}
+            />
+          )}
+          {latitude && longitude && (
+            <>
+              <Text>Your Location Is</Text>
+              <Text style={styles.heartRateText}>LAT: {latitude}</Text>
+              <Text style={styles.heartRateText}>LONG: {longitude}</Text>
+            </>
+          )}
+        </View>
+      </SafeAreaView>
+    );
+  }
+
+  function HomeScreen() {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={{alignItems: 'center', marginTop: 15}}>
+          <MaterialIcon name="run-fast" size={40}/>
+        </View>
+        <View style={{flexDirection: 'column'}}>
+          {isDuration && <View style={{marginTop: 10, marginLeft: 15, marginRight: 15, borderWidth: 2, borderRadius: 10, borderColor: '#F08080'}}>
+            <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 5, color: '#E9967A'}}>Duration</Text>
+            <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 10}}>00:00</Text>
+          </View>}
+          {(isAveragePace || isCurrentPace) && <View style={{marginLeft: 15, marginRight: 15, borderBottomWidth: 2, borderBottomColor: '#F08080', flexDirection: 'row', alignContent: 'center', alignItems: 'center', justifyContent: 'space-evenly'}}>
+            {isCurrentPace && <View>
+              <Text style={{textAlign: 'center', fontSize: 25, marginBottom: 15, marginTop: 15, color: '#E9967A'}}>Current Pace</Text>
+              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 10}}>0</Text>
+              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 20}}>km/h</Text>
+            </View>}
+            {isCurrentPace && isAveragePace && <View style={{height: '80%', width: 1.5, backgroundColor: '#F08080'}}></View>}
+            {isAveragePace && <View>
+              <Text style={{textAlign: 'center', fontSize: 25, marginBottom: 15, marginTop: 15, color: '#E9967A'}}>Average Pace</Text>
+              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 10}}>0</Text>
+              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 20}}>km/h</Text>
+            </View>}
+          </View>}
+          {isKilometers && <View style={{marginTop: 15, marginBottom: 15, marginLeft: 15, marginRight: 15, borderBottomWidth: 2, borderBottomColor: '#F08080'}}>
+            <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 5, color: '#E9967A'}}>Distance</Text>
+            <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 10}}>0 km</Text>
+          </View>}
+        </View>
+        <View style={{flexDirection: 'row', alignContent: 'center', alignItems: 'center', justifyContent: 'space-evenly', marginTop: 20}}>
+          {buttonInfo.startButton && <View>
+            <TouchableOpacity onPress={()=>{toggleStartPauseButton()}} style={{backgroundColor: '#67AE33', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
+              <Icon name='play-circle-outline' size={30} color="white"/>
+            </TouchableOpacity>
+          </View>}
+          {buttonInfo.pauseButton && <View>
+            <TouchableOpacity onPress={()=>{toggleStartPauseButton()}} style={{backgroundColor: '#67AE33', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
+              <Icon name='pause-circle-outline' size={30} color="white"/>
+            </TouchableOpacity>
+          </View>}
+          {buttonInfo.stopButton && <View>
+            <TouchableOpacity onPress={()=>{stopButton()}} style={{backgroundColor: '#E73415', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
+              <Icon name='stop-circle-outline' size={30} color="white"/>
+            </TouchableOpacity>
+            </View>}
+        </View>
+     {/*   <View style={styles.heartRateTitleWrapper}>
+          {isConnected ? (
+            <>
+              <Text style={styles.heartRateTitleText}>Your Pace Is:</Text>
+              <Text style={styles.heartRateText}>{heartRate}</Text>
+            </>
+          ) : (
+            <Text style={styles.heartRateTitleText}>
+              Please Connect to a Arduino Nano BLE 33 {count}
+            </Text>
+          )}
+        </View>
+        {isConnected && (
+          <TextInput
+            placeholder={'placeholder'}
+            onChangeText={text => setMyState(text)}
+          />
+        )}
+        {true && (
+          <TextInput
+            placeholder={'placeholder'}
+            onChangeText={text => setMyHeight(text)}
+            style={styles.input}
+          />
+        )}*/}
+        </SafeAreaView>
+    );
+  }
+  const HomeStack = createNativeStackNavigator();
+  const MapStack = createNativeStackNavigator();
+  const SettingsDrawer = createDrawerNavigator();
+  const BottomTab = createBottomTabNavigator();
+
+  function TabScreen() {
+    return (
+      <BottomTab.Navigator initialRouteName='Home' screenOptions={{
+        tabBarActiveTintColor: "black",
+        tabBarInactiveBackgroundColor: "lightblue",
+        tabBarActiveBackgroundColor: "lightblue",
+      }}>
+        <BottomTab.Screen name="HomeTab" component={HomeStackScreen} options={{
+          headerShown: false,
+          tabBarLabel: "Home",
+          tabBarIcon: ({color, size}) => (
+            <Icon
+              name="home-sharp"
+              color={color}
+              size={size}
+            />
+          ),
+        }}/>
+        <BottomTab.Screen name="MapTab" component={MapStackScreen} options={{
+          headerShown: false,
+          tabBarLabel: "Map",
+          tabBarIcon: ({color, size}) => (
+            <MaterialIcon
+              name="google-maps"
+              color={color}
+              size={30}
+            />
+          ),
+        }}/>
+      </BottomTab.Navigator>
+    );
+  }
+
+  const MapStackScreen = ({navigation}) => (
+    <MapStack.Navigator screenOptions={{
+      headerStyle: { backgroundColor: '#F08080' },
+      headerTintColor: '#fff',
+      headerTitleAlign: 'center'
+    }}>
+        <MapStack.Screen
+          name="MapScreen"
+          component={MapScreen}
+          options={{
+            title: 'OpticPace',
+            headerLeft: () => (
+              <Icon.Button 
+                name='settings'
+                size={25}
+                backgroundColor='#F08080'
+                onPress={() => { navigation.openDrawer() }}
+              />
+            )}}/>
+    </MapStack.Navigator>
+  );
+
+  const HomeStackScreen = ({navigation}) => (
+    <HomeStack.Navigator screenOptions={{
+      headerStyle: { backgroundColor: '#F08080' },
+      headerTintColor: '#fff',
+      headerTitleAlign: 'center'
+    }}>
+        <HomeStack.Screen
+          name="HomeScreen"
+          component={HomeScreen}
+          options={{
+            title: 'OpticPace',
+            headerLeft: () => (
+              <Icon.Button 
+                name='settings'
+                size={25}
+                backgroundColor='#F08080'
+                onPress={() => { navigation.openDrawer() }}
+              />
+            )}}/>
+    </HomeStack.Navigator>
+  );
+
   const [myState, setMyState] = useState('');
   const [myHeight, setMyHeight] = useState('');
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.heartRateTitleWrapper}>
-        {isConnected ? (
-          <>
-            <Text style={styles.heartRateTitleText}>Your Pace Is:</Text>
-            <Text style={styles.heartRateText}>{heartRate}</Text>
-          </>
-        ) : (
-          <Text style={styles.heartRateTitleText}>
-            Please Connect to a Arduino Nano BLE 33 {count}
-          </Text>
-        )}
-        {latitude && longitude && (
-          <>
-            <Text>Your Location Is</Text>
-            <Text style={styles.heartRateText}>LAT: {latitude}</Text>
-            <Text style={styles.heartRateText}>LONG: {longitude}</Text>
-          </>
-        )}
-      </View>
+    <NavigationContainer>
+      {/*<AuthStackScreen/>*/}
+      <SettingsDrawer.Navigator initialRouteName='Home' drawerContent={ props => <DrawerPage {...props}
+        showAveragePace={isAveragePace}
+        showCurrentPace={isCurrentPace}
+        showDuration={isDuration}
+        showKilometers={isKilometers}
+        toggleShowAveragePace={toggleAveragePace}
+        toggleShowCurrentPace={toggleCurrentPace}
+        toggleShowDuration={toggleDuration}
+        toggleShowKilometers={toggleKilometers}
+      />}>
+        <SettingsDrawer.Screen name="Home" component={TabScreen} options={{headerShown: false, headerTitle: 'Home'}}/>
+      </SettingsDrawer.Navigator>
+    </NavigationContainer>
+    /*<SafeAreaView style={styles.container}>
       {isConnected && (
         <TextInput
           placeholder={'placeholder'}
@@ -199,21 +434,13 @@ const Home: FC = () => {
           }}
         />
       )}
-      {true && (
-        <CTAButton
-          title="GET GPS LOCATION"
-          onPress={() => {
-            getLocation();
-          }}
-        />
-      )}
       <DeviceModal
         devices={devices}
         visible={isModalVisible}
         closeModal={closeModal}
         connectToPeripheral={connectToPeripheral}
       />
-    </SafeAreaView>
+    </SafeAreaView>*/
   );
 };
 
@@ -243,6 +470,21 @@ const styles = StyleSheet.create({
     fontSize: 18,
     color: '#101010',
   },
+  appName: {
+    position: 'absolute',
+    left: 129,
+    fontSize: 25,
+  },
+  headerContainer: {
+    flexDirection: 'row',
+    marginTop: 10,
+    marginLeft: 10
+  },
+  title: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center'
+  }
 });
 
 export default App;
