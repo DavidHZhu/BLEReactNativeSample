@@ -9,9 +9,16 @@
  */
 import 'react-native-gesture-handler';
 import React, {FC, useState} from 'react';
-import { NavigationContainer } from '@react-navigation/native';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import {SafeAreaView, StyleSheet, Text, View, TextInput, TouchableOpacity} from 'react-native';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import {
+  SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+  TextInput,
+  TouchableOpacity,
+} from 'react-native';
 import {Provider, useDispatch, useSelector} from 'react-redux';
 import CTAButton from './components/CTAButton';
 import DeviceModal from './components/DeviceConnectionModal';
@@ -24,25 +31,22 @@ import {
 import {RootState, store} from './store/store';
 import bluetoothLeManager from './modules/Bluetooth/BluetoothLeManager';
 import RNLocation from 'react-native-location';
-import Icon from 'react-native-vector-icons/Ionicons'
-import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons'
+import Icon from 'react-native-vector-icons/Ionicons';
+import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import base64 from 'react-native-base64';
-import { inlineStyles } from 'react-native-svg';
-import { toHtml } from '@fortawesome/fontawesome-svg-core';
-import {
-  Banner,
-  Divider,
-  IconButton
-} from 'react-native-paper'
-import { createDrawerNavigator } from '@react-navigation/drawer';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { DrawerPage} from './screens/DrawerContent';
+import {inlineStyles} from 'react-native-svg';
+import {toHtml} from '@fortawesome/fontawesome-svg-core';
+import {Banner, Divider, IconButton} from 'react-native-paper';
+import {createDrawerNavigator} from '@react-navigation/drawer';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import {DrawerPage} from './screens/DrawerContent';
 import AuthStackScreen from './screens/AuthenticationStack';
 
 // RNLocation.configure({
 //  distanceFilter: null
 // });
 var Buffer = require('buffer/').Buffer;
+var geolib = require('geolib');
 const App: FC = () => {
   return (
     <Provider store={store}>
@@ -69,40 +73,38 @@ const Home: FC = () => {
     startButton: true,
     pauseButton: false,
     stopButton: false,
-});
+  });
 
   const toggleStartPauseButton = () => {
     setButtonInfo({
       startButton: !buttonInfo.startButton,
       pauseButton: !buttonInfo.pauseButton,
-      stopButton: buttonInfo.stopButton === false ? true : buttonInfo.stopButton
+      stopButton:
+        buttonInfo.stopButton === false ? true : buttonInfo.stopButton,
     });
-  }
+  };
   const stopButton = () => {
     setButtonInfo({
       startButton: true,
       pauseButton: false,
       stopButton: false,
     });
-  }
+  };
   const toggleDuration = () => {
     setIsDuration(!isDuration);
-
-  }
+  };
 
   const toggleCurrentPace = () => {
     setIsCurrentPace(!isCurrentPace);
-
-  }
+  };
 
   const toggleAveragePace = () => {
     setIsAveragePace(!isAveragePace);
-
-  }
+  };
 
   const toggleKilometers = () => {
     setIsKilometers(!isKilometers);
-  }
+  };
 
   const devices = useSelector(
     (state: RootState) => state.bluetooth.availableDevices,
@@ -154,21 +156,53 @@ const Home: FC = () => {
       setLongitude(location?.longitude);
       console.log(latitude, longitude);
     } else {
+      // while (true) {
+      //   // location = await RNLocation.getLatestLocation({timeout: 100});
+      //   // console.log(location?.latitude);
+      //   // setLatitude(location?.latitude);
+      //   // setLongitude(location?.longitude);
+      //   // console.log(location?.latitude, location?.latitude);
+      //   // var buf = Buffer.alloc(16);
+      //   // buf.writeDoubleLE(location?.latitude);
+      //   // buf.writeDoubleLE(location?.latitude, 8);
+      //   // let output = buf.toString('base64');
+      //   // console.log('Lat' + buf.readDoubleLE() + ' Long' + buf.readDoubleLE(8));
+      //   // console.log('Output=' + output);
+      //   // console.log('Output Size=' + output.length);
+      //   // bluetoothLeManager.sendBLEWriteString(output);
+      //   // await sleep(5000);
+      // }
+      // given a time window, calculate how much distance is covered
+      // let's say in x seconds, fetching gps coords for every second
+      // store gps coords and then at the end of this time window, compute the distance and send, rinse and repeat
       while (true) {
-        location = await RNLocation.getLatestLocation({timeout: 100});
-        console.log(location?.latitude);
-        setLatitude(location?.latitude);
-        setLongitude(location?.longitude);
-        console.log(location?.latitude, location?.latitude);
-        var buf = Buffer.alloc(16);
-        buf.writeDoubleLE(location?.latitude);
-        buf.writeDoubleLE(location?.latitude, 8);
-        let output = buf.toString('base64');
-        console.log('Lat' + buf.readDoubleLE() + ' Long' + buf.readDoubleLE(8));
-        console.log('Output=' + output);
-        console.log('Output Size=' + output.length);
-        bluetoothLeManager.sendBLEWriteString(output);
-        await sleep(5000);
+        let curr_gps_data = [];
+        console.log('Starting poll....');
+        for (let i = 0; i < 20; i++) {
+          const curr_location = await RNLocation.getLatestLocation({
+            timeout: 100,
+          });
+          if (curr_location != null) {
+            console.log(
+              `Lat: ${curr_location.latitude}, Lon: ${curr_location.latitude}, Accuracy: ${curr_location.accuracy}, Timestamp: ${curr_location.timestamp}`,
+            );
+            curr_gps_data.push(curr_location);
+          }
+          await sleep(1000);
+        }
+        console.log('List:' + JSON.stringify(curr_gps_data));
+        // compute the distance given the list
+        const distance = geolib.getPathLength(curr_gps_data);
+        // this distance is a very rough estimate (off by like 10 meters)
+        // time => take the time stamps and subtract them (in our case should be 20s ...)
+        const duration =
+          (curr_gps_data[curr_gps_data.length - 1].timestamp -
+            curr_gps_data[0].timestamp) /
+          1000;
+        const speed = duration > 0 ? distance / duration : 0;
+        console.log('Distance:' + distance);
+        console.log('Duration:' + duration);
+        console.log(`Speed: ${speed}m/s`);
       }
     }
   };
@@ -176,7 +210,7 @@ const Home: FC = () => {
   function MapScreen() {
     return (
       <SafeAreaView style={styles.container}>
-      <View>
+        <View>
           <Text style={{textAlign: 'center', marginBottom: 50}}>Map Page</Text>
           {true && (
             <CTAButton
@@ -202,49 +236,200 @@ const Home: FC = () => {
     return (
       <SafeAreaView style={styles.container}>
         <View style={{alignItems: 'center', marginTop: 15}}>
-          <MaterialIcon name="run-fast" size={40}/>
+          <MaterialIcon name="run-fast" size={40} />
         </View>
         <View style={{flexDirection: 'column'}}>
-          {isDuration && <View style={{marginTop: 10, marginLeft: 15, marginRight: 15, borderWidth: 2, borderRadius: 10, borderColor: '#F08080'}}>
-            <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 5, color: '#E9967A'}}>Duration</Text>
-            <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 10}}>00:00</Text>
-          </View>}
-          {(isAveragePace || isCurrentPace) && <View style={{marginLeft: 15, marginRight: 15, borderBottomWidth: 2, borderBottomColor: '#F08080', flexDirection: 'row', alignContent: 'center', alignItems: 'center', justifyContent: 'space-evenly'}}>
-            {isCurrentPace && <View>
-              <Text style={{textAlign: 'center', fontSize: 25, marginBottom: 15, marginTop: 15, color: '#E9967A'}}>Current Pace</Text>
-              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 10}}>0</Text>
-              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 20}}>km/h</Text>
-            </View>}
-            {isCurrentPace && isAveragePace && <View style={{height: '80%', width: 1.5, backgroundColor: '#F08080'}}></View>}
-            {isAveragePace && <View>
-              <Text style={{textAlign: 'center', fontSize: 25, marginBottom: 15, marginTop: 15, color: '#E9967A'}}>Average Pace</Text>
-              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 10}}>0</Text>
-              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 20}}>km/h</Text>
-            </View>}
-          </View>}
-          {isKilometers && <View style={{marginTop: 15, marginBottom: 15, marginLeft: 15, marginRight: 15, borderBottomWidth: 2, borderBottomColor: '#F08080'}}>
-            <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 5, color: '#E9967A'}}>Distance</Text>
-            <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 10}}>0 km</Text>
-          </View>}
+          {isDuration && (
+            <View
+              style={{
+                marginTop: 10,
+                marginLeft: 15,
+                marginRight: 15,
+                borderWidth: 2,
+                borderRadius: 10,
+                borderColor: '#F08080',
+              }}>
+              <Text
+                style={{
+                  textAlign: 'center',
+                  fontSize: 35,
+                  marginBottom: 5,
+                  color: '#E9967A',
+                }}>
+                Duration
+              </Text>
+              <Text
+                style={{textAlign: 'center', fontSize: 35, marginBottom: 10}}>
+                00:00
+              </Text>
+            </View>
+          )}
+          {(isAveragePace || isCurrentPace) && (
+            <View
+              style={{
+                marginLeft: 15,
+                marginRight: 15,
+                borderBottomWidth: 2,
+                borderBottomColor: '#F08080',
+                flexDirection: 'row',
+                alignContent: 'center',
+                alignItems: 'center',
+                justifyContent: 'space-evenly',
+              }}>
+              {isCurrentPace && (
+                <View>
+                  <Text
+                    style={{
+                      textAlign: 'center',
+                      fontSize: 25,
+                      marginBottom: 15,
+                      marginTop: 15,
+                      color: '#E9967A',
+                    }}>
+                    Current Pace
+                  </Text>
+                  <Text
+                    style={{
+                      textAlign: 'center',
+                      fontSize: 30,
+                      marginBottom: 10,
+                    }}>
+                    0
+                  </Text>
+                  <Text
+                    style={{
+                      textAlign: 'center',
+                      fontSize: 30,
+                      marginBottom: 20,
+                    }}>
+                    km/h
+                  </Text>
+                </View>
+              )}
+              {isCurrentPace && isAveragePace && (
+                <View
+                  style={{
+                    height: '80%',
+                    width: 1.5,
+                    backgroundColor: '#F08080',
+                  }}></View>
+              )}
+              {isAveragePace && (
+                <View>
+                  <Text
+                    style={{
+                      textAlign: 'center',
+                      fontSize: 25,
+                      marginBottom: 15,
+                      marginTop: 15,
+                      color: '#E9967A',
+                    }}>
+                    Average Pace
+                  </Text>
+                  <Text
+                    style={{
+                      textAlign: 'center',
+                      fontSize: 30,
+                      marginBottom: 10,
+                    }}>
+                    0
+                  </Text>
+                  <Text
+                    style={{
+                      textAlign: 'center',
+                      fontSize: 30,
+                      marginBottom: 20,
+                    }}>
+                    km/h
+                  </Text>
+                </View>
+              )}
+            </View>
+          )}
+          {isKilometers && (
+            <View
+              style={{
+                marginTop: 15,
+                marginBottom: 15,
+                marginLeft: 15,
+                marginRight: 15,
+                borderBottomWidth: 2,
+                borderBottomColor: '#F08080',
+              }}>
+              <Text
+                style={{
+                  textAlign: 'center',
+                  fontSize: 35,
+                  marginBottom: 5,
+                  color: '#E9967A',
+                }}>
+                Distance
+              </Text>
+              <Text
+                style={{textAlign: 'center', fontSize: 35, marginBottom: 10}}>
+                0 km
+              </Text>
+            </View>
+          )}
         </View>
-        <View style={{flexDirection: 'row', alignContent: 'center', alignItems: 'center', justifyContent: 'space-evenly', marginTop: 20}}>
-          {buttonInfo.startButton && <View>
-            <TouchableOpacity onPress={()=>{toggleStartPauseButton()}} style={{backgroundColor: '#67AE33', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
-              <Icon name='play-circle-outline' size={30} color="white"/>
-            </TouchableOpacity>
-          </View>}
-          {buttonInfo.pauseButton && <View>
-            <TouchableOpacity onPress={()=>{toggleStartPauseButton()}} style={{backgroundColor: '#67AE33', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
-              <Icon name='pause-circle-outline' size={30} color="white"/>
-            </TouchableOpacity>
-          </View>}
-          {buttonInfo.stopButton && <View>
-            <TouchableOpacity onPress={()=>{stopButton()}} style={{backgroundColor: '#E73415', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
-              <Icon name='stop-circle-outline' size={30} color="white"/>
-            </TouchableOpacity>
-            </View>}
+        <View
+          style={{
+            flexDirection: 'row',
+            alignContent: 'center',
+            alignItems: 'center',
+            justifyContent: 'space-evenly',
+            marginTop: 20,
+          }}>
+          {buttonInfo.startButton && (
+            <View>
+              <TouchableOpacity
+                onPress={() => {
+                  toggleStartPauseButton();
+                }}
+                style={{
+                  backgroundColor: '#67AE33',
+                  borderRadius: 20,
+                  paddingVertical: 5,
+                  paddingHorizontal: 25,
+                }}>
+                <Icon name="play-circle-outline" size={30} color="white" />
+              </TouchableOpacity>
+            </View>
+          )}
+          {buttonInfo.pauseButton && (
+            <View>
+              <TouchableOpacity
+                onPress={() => {
+                  toggleStartPauseButton();
+                }}
+                style={{
+                  backgroundColor: '#67AE33',
+                  borderRadius: 20,
+                  paddingVertical: 5,
+                  paddingHorizontal: 25,
+                }}>
+                <Icon name="pause-circle-outline" size={30} color="white" />
+              </TouchableOpacity>
+            </View>
+          )}
+          {buttonInfo.stopButton && (
+            <View>
+              <TouchableOpacity
+                onPress={() => {
+                  stopButton();
+                }}
+                style={{
+                  backgroundColor: '#E73415',
+                  borderRadius: 20,
+                  paddingVertical: 5,
+                  paddingHorizontal: 25,
+                }}>
+                <Icon name="stop-circle-outline" size={30} color="white" />
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
-     {/*   <View style={styles.heartRateTitleWrapper}>
+        {/*   <View style={styles.heartRateTitleWrapper}>
           {isConnected ? (
             <>
               <Text style={styles.heartRateTitleText}>Your Pace Is:</Text>
@@ -269,7 +454,7 @@ const Home: FC = () => {
             style={styles.input}
           />
         )}*/}
-        </SafeAreaView>
+      </SafeAreaView>
     );
   }
   const HomeStack = createNativeStackNavigator();
@@ -279,78 +464,90 @@ const Home: FC = () => {
 
   function TabScreen() {
     return (
-      <BottomTab.Navigator initialRouteName='Home' screenOptions={{
-        tabBarActiveTintColor: "black",
-        tabBarInactiveBackgroundColor: "lightblue",
-        tabBarActiveBackgroundColor: "lightblue",
-      }}>
-        <BottomTab.Screen name="HomeTab" component={HomeStackScreen} options={{
-          headerShown: false,
-          tabBarLabel: "Home",
-          tabBarIcon: ({color, size}) => (
-            <Icon
-              name="home-sharp"
-              color={color}
-              size={size}
-            />
-          ),
-        }}/>
-        <BottomTab.Screen name="MapTab" component={MapStackScreen} options={{
-          headerShown: false,
-          tabBarLabel: "Map",
-          tabBarIcon: ({color, size}) => (
-            <MaterialIcon
-              name="google-maps"
-              color={color}
-              size={30}
-            />
-          ),
-        }}/>
+      <BottomTab.Navigator
+        initialRouteName="Home"
+        screenOptions={{
+          tabBarActiveTintColor: 'black',
+          tabBarInactiveBackgroundColor: 'lightblue',
+          tabBarActiveBackgroundColor: 'lightblue',
+        }}>
+        <BottomTab.Screen
+          name="HomeTab"
+          component={HomeStackScreen}
+          options={{
+            headerShown: false,
+            tabBarLabel: 'Home',
+            tabBarIcon: ({color, size}) => (
+              <Icon name="home-sharp" color={color} size={size} />
+            ),
+          }}
+        />
+        <BottomTab.Screen
+          name="MapTab"
+          component={MapStackScreen}
+          options={{
+            headerShown: false,
+            tabBarLabel: 'Map',
+            tabBarIcon: ({color, size}) => (
+              <MaterialIcon name="google-maps" color={color} size={30} />
+            ),
+          }}
+        />
       </BottomTab.Navigator>
     );
   }
 
   const MapStackScreen = ({navigation}) => (
-    <MapStack.Navigator screenOptions={{
-      headerStyle: { backgroundColor: '#F08080' },
-      headerTintColor: '#fff',
-      headerTitleAlign: 'center'
-    }}>
-        <MapStack.Screen
-          name="MapScreen"
-          component={MapScreen}
-          options={{
-            title: 'OpticPace',
-            headerLeft: () => (
-              <Icon.Button 
-                name='settings'
-                size={25}
-                backgroundColor='#F08080'
-                onPress={() => { navigation.openDrawer() }}
-              />
-            )}}/>
+    <MapStack.Navigator
+      screenOptions={{
+        headerStyle: {backgroundColor: '#F08080'},
+        headerTintColor: '#fff',
+        headerTitleAlign: 'center',
+      }}>
+      <MapStack.Screen
+        name="MapScreen"
+        component={MapScreen}
+        options={{
+          title: 'OpticPace',
+          headerLeft: () => (
+            <Icon.Button
+              name="settings"
+              size={25}
+              backgroundColor="#F08080"
+              onPress={() => {
+                navigation.openDrawer();
+              }}
+            />
+          ),
+        }}
+      />
     </MapStack.Navigator>
   );
 
   const HomeStackScreen = ({navigation}) => (
-    <HomeStack.Navigator screenOptions={{
-      headerStyle: { backgroundColor: '#F08080' },
-      headerTintColor: '#fff',
-      headerTitleAlign: 'center'
-    }}>
-        <HomeStack.Screen
-          name="HomeScreen"
-          component={HomeScreen}
-          options={{
-            title: 'OpticPace',
-            headerLeft: () => (
-              <Icon.Button 
-                name='settings'
-                size={25}
-                backgroundColor='#F08080'
-                onPress={() => { navigation.openDrawer() }}
-              />
-            )}}/>
+    <HomeStack.Navigator
+      screenOptions={{
+        headerStyle: {backgroundColor: '#F08080'},
+        headerTintColor: '#fff',
+        headerTitleAlign: 'center',
+      }}>
+      <HomeStack.Screen
+        name="HomeScreen"
+        component={HomeScreen}
+        options={{
+          title: 'OpticPace',
+          headerLeft: () => (
+            <Icon.Button
+              name="settings"
+              size={25}
+              backgroundColor="#F08080"
+              onPress={() => {
+                navigation.openDrawer();
+              }}
+            />
+          ),
+        }}
+      />
     </HomeStack.Navigator>
   );
 
@@ -359,17 +556,26 @@ const Home: FC = () => {
   return (
     <NavigationContainer>
       {/*<AuthStackScreen/>*/}
-      <SettingsDrawer.Navigator initialRouteName='Home' drawerContent={ props => <DrawerPage {...props}
-        showAveragePace={isAveragePace}
-        showCurrentPace={isCurrentPace}
-        showDuration={isDuration}
-        showKilometers={isKilometers}
-        toggleShowAveragePace={toggleAveragePace}
-        toggleShowCurrentPace={toggleCurrentPace}
-        toggleShowDuration={toggleDuration}
-        toggleShowKilometers={toggleKilometers}
-      />}>
-        <SettingsDrawer.Screen name="Home" component={TabScreen} options={{headerShown: false, headerTitle: 'Home'}}/>
+      <SettingsDrawer.Navigator
+        initialRouteName="Home"
+        drawerContent={props => (
+          <DrawerPage
+            {...props}
+            showAveragePace={isAveragePace}
+            showCurrentPace={isCurrentPace}
+            showDuration={isDuration}
+            showKilometers={isKilometers}
+            toggleShowAveragePace={toggleAveragePace}
+            toggleShowCurrentPace={toggleCurrentPace}
+            toggleShowDuration={toggleDuration}
+            toggleShowKilometers={toggleKilometers}
+          />
+        )}>
+        <SettingsDrawer.Screen
+          name="Home"
+          component={TabScreen}
+          options={{headerShown: false, headerTitle: 'Home'}}
+        />
       </SettingsDrawer.Navigator>
     </NavigationContainer>
     /*<SafeAreaView style={styles.container}>
@@ -478,13 +684,13 @@ const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: 'row',
     marginTop: 10,
-    marginLeft: 10
+    marginLeft: 10,
   },
   title: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center'
-  }
+    justifyContent: 'center',
+  },
 });
 
 export default App;
