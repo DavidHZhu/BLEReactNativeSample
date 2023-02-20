@@ -23,6 +23,7 @@ import {Provider, useDispatch, useSelector} from 'react-redux';
 import CTAButton from './components/CTAButton';
 import DeviceModal from './components/DeviceConnectionModal';
 import {BluetoothPeripheral} from './models/BluetoothPeripheral';
+import {StepCountResponse} from './models/StepCountResponse';
 import {
   initiateConnection,
   scanForPeripherals,
@@ -157,26 +158,34 @@ const Home: FC = () => {
       console.log(latitude, longitude);
     } else {
       // while (true) {
-      //   // location = await RNLocation.getLatestLocation({timeout: 100});
-      //   // console.log(location?.latitude);
-      //   // setLatitude(location?.latitude);
-      //   // setLongitude(location?.longitude);
-      //   // console.log(location?.latitude, location?.latitude);
-      //   // var buf = Buffer.alloc(16);
-      //   // buf.writeDoubleLE(location?.latitude);
-      //   // buf.writeDoubleLE(location?.latitude, 8);
-      //   // let output = buf.toString('base64');
-      //   // console.log('Lat' + buf.readDoubleLE() + ' Long' + buf.readDoubleLE(8));
-      //   // console.log('Output=' + output);
-      //   // console.log('Output Size=' + output.length);
-      //   // bluetoothLeManager.sendBLEWriteString(output);
-      //   // await sleep(5000);
+      //   location = await RNLocation.getLatestLocation({timeout: 100});
+      //   console.log(location?.latitude);
+      //   setLatitude(location?.latitude);
+      //   setLongitude(location?.longitude);
+      //   console.log(location?.latitude, location?.latitude);
+      //   var buf = Buffer.alloc(16);
+      //   buf.writeDoubleLE(location?.latitude);
+      //   buf.writeDoubleLE(location?.latitude, 8);
+      //   let output = buf.toString('base64');
+      //   console.log('Lat' + buf.readDoubleLE() + ' Long' + buf.readDoubleLE(8));
+      //   console.log('Output=' + output);
+      //   console.log('Output Size=' + output.length);
+      //   bluetoothLeManager.sendBLEWriteString(output);
+      //   await sleep(5000);
       // }
       // given a time window, calculate how much distance is covered
       // let's say in x seconds, fetching gps coords for every second
       // store gps coords and then at the end of this time window, compute the distance and send, rinse and repeat
+
+      const reset_code = 0; // 'Some sort of reset code here to indicate that there was a reset'
       while (true) {
-        let curr_gps_data = [];
+        const curr_gps_data = [];
+        const start = await bluetoothLeManager.getBLEStepLog();
+        if (start == undefined || start.start_code == reset_code) {
+          // break? here, we have to stop though,
+          continue;
+        }
+
         console.log('Starting poll....');
         for (let i = 0; i < 20; i++) {
           const curr_location = await RNLocation.getLatestLocation({
@@ -194,15 +203,18 @@ const Home: FC = () => {
         // compute the distance given the list
         const distance = geolib.getPathLength(curr_gps_data);
         // this distance is a very rough estimate (off by like 10 meters)
-        // time => take the time stamps and subtract them (in our case should be 20s ...)
-        const duration =
-          (curr_gps_data[curr_gps_data.length - 1].timestamp -
-            curr_gps_data[0].timestamp) /
-          1000;
-        const speed = duration > 0 ? distance / duration : 0;
+        const end = await bluetoothLeManager.getBLEStepLog();
+        if (end == undefined || end.start_code == reset_code) {
+          // break? here, we have to stop though,
+          continue;
+        }
+        const total_steps = end.step_count - start.step_count;
+
         console.log('Distance:' + distance);
-        console.log('Duration:' + duration);
-        console.log(`Speed: ${speed}m/s`);
+        const dist_per_step =
+          total_steps != 0 && distance != 0 ? distance / total_steps : 0;
+
+        console.log('Distance per step (m/step):' + dist_per_step);
       }
     }
   };
