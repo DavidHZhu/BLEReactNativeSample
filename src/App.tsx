@@ -177,11 +177,10 @@ const Home: FC = () => {
       // let's say in x seconds, fetching gps coords for every second
       // store gps coords and then at the end of this time window, compute the distance and send, rinse and repeat
 
-      const reset_code = 0; // 'Some sort of reset code here to indicate that there was a reset'
       while (true) {
         const curr_gps_data = [];
         const start = await bluetoothLeManager.getBLEStepLog();
-        if (start == undefined || start.start_code == reset_code) {
+        if (start == undefined) {
           // break? here, we have to stop though,
           continue;
         }
@@ -204,8 +203,8 @@ const Home: FC = () => {
         const distance = geolib.getPathLength(curr_gps_data);
         // this distance is a very rough estimate (off by like 10 meters)
         const end = await bluetoothLeManager.getBLEStepLog();
-        if (end == undefined || end.start_code == reset_code) {
-          // break? here, we have to stop though,
+        if (end == undefined || start.session_code != end.session_code) {
+          // session codes are different => different sessions, a reset happened inbetween
           continue;
         }
         const total_steps = end.step_count - start.step_count;

@@ -173,7 +173,7 @@ class BluetoothLeManager {
         const avg_acceleration: number = data.readFloatLE(8);
 
         const result: StepCountResponse = {
-          start_code: start_code,
+          session_code: start_code,
           step_count: step_count,
           avg_acceleration: avg_acceleration,
         };
