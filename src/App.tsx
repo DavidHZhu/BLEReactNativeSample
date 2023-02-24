@@ -11,7 +11,7 @@ import 'react-native-gesture-handler';
 import React, {FC, useState} from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import {SafeAreaView, StyleSheet, Text, View, TextInput, TouchableOpacity} from 'react-native';
+import {SafeAreaView, StyleSheet, Text, View, TextInput, TouchableOpacity, FlatList} from 'react-native';
 import {Provider, useDispatch, useSelector} from 'react-redux';
 import CTAButton from './components/CTAButton';
 import DeviceModal from './components/DeviceConnectionModal';
@@ -26,6 +26,7 @@ import bluetoothLeManager from './modules/Bluetooth/BluetoothLeManager';
 import RNLocation from 'react-native-location';
 import Icon from 'react-native-vector-icons/Ionicons'
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons'
+import FoundationIcon from 'react-native-vector-icons/Foundation'
 import base64 from 'react-native-base64';
 import { inlineStyles } from 'react-native-svg';
 import { toHtml } from '@fortawesome/fontawesome-svg-core';
@@ -173,6 +174,32 @@ const Home: FC = () => {
     }
   };
 
+  function HistoryScreen() {
+    return (
+      <SafeAreaView style={styles.container}>
+      <View>
+          <FlatList
+            data={[
+              {year: 2023, month: 2, day: 20, duration: 18, distance: 3, pace: 6},
+              {year: 2023, month: 2, day: 20, duration: 18, distance: 3, pace: 6},
+              {year: 2023, month: 2, day: 20, duration: 18, distance: 3, pace: 6},
+              {year: 2023, month: 2, day: 20, duration: 18, distance: 3, pace: 6},
+              {year: 2023, month: 2, day: 20, duration: 18, distance: 3, pace: 6},
+              {year: 2023, month: 2, day: 20, duration: 18, distance: 3, pace: 6},
+              {year: 2023, month: 2, day: 20, duration: 18, distance: 3, pace: 6},
+              {year: 2023, month: 2, day: 20, duration: 18, distance: 3, pace: 6},
+              {year: 2023, month: 2, day: 20, duration: 18, distance: 3, pace: 6},
+              {year: 2023, month: 2, day: 20, duration: 18, distance: 3, pace: 6},
+            ]}
+            renderItem={
+              ({item}) => <Text>{item.pace}</Text>
+            }
+          />
+      </View>
+      </SafeAreaView>
+    );
+  }
+
   function MapScreen() {
     return (
       <SafeAreaView style={styles.container}>
@@ -274,6 +301,7 @@ const Home: FC = () => {
   }
   const HomeStack = createNativeStackNavigator();
   const MapStack = createNativeStackNavigator();
+  const HistoryStack = createNativeStackNavigator();
   const SettingsDrawer = createDrawerNavigator();
   const BottomTab = createBottomTabNavigator();
 
@@ -292,6 +320,17 @@ const Home: FC = () => {
               name="home-sharp"
               color={color}
               size={size}
+            />
+          ),
+        }}/>
+        <BottomTab.Screen name="HistoryTab" component={HistoryStackScreen} options={{
+          headerShown: false,
+          tabBarLabel: "History",
+          tabBarIcon: ({color, size}) => (
+            <FoundationIcon
+              name="results"
+              color={color}
+              size={30}
             />
           ),
         }}/>
@@ -330,6 +369,28 @@ const Home: FC = () => {
               />
             )}}/>
     </MapStack.Navigator>
+  );
+
+  const HistoryStackScreen = ({navigation}) => (
+    <HistoryStack.Navigator screenOptions={{
+      headerStyle: { backgroundColor: '#F08080' },
+      headerTintColor: '#fff',
+      headerTitleAlign: 'center'
+    }}>
+        <HistoryStack.Screen
+          name="HistoryScreen"
+          component={HistoryScreen}
+          options={{
+            title: 'OpticPace',
+            headerLeft: () => (
+              <Icon.Button 
+                name='settings'
+                size={25}
+                backgroundColor='#F08080'
+                onPress={() => { navigation.openDrawer() }}
+              />
+            )}}/>
+    </HistoryStack.Navigator>
   );
 
   const HomeStackScreen = ({navigation}) => (
