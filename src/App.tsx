@@ -218,6 +218,88 @@ const Home: FC = () => {
     }
   };
 
+  function BluetoothScreen() {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View>
+          <Text style={{textAlign: 'center', marginBottom: 50}}>
+            Bluetooth Page
+          </Text>
+          {
+            <CTAButton
+              title="Connect"
+              onPress={() => {
+                dispatch(scanForPeripherals());
+                setCount(count + 1);
+                setIsModalVisible(true);
+              }}
+            />
+          }
+          {/* {latitude && longitude && (
+            <>
+              <Text>Your Location Is</Text>
+              <Text style={styles.heartRateText}>LAT: {latitude}</Text>
+              <Text style={styles.heartRateText}>LONG: {longitude}</Text>
+            </>
+          )} */}
+          {isConnected && (
+            <CTAButton
+              title="Get BLE Read"
+              onPress={() => {
+                dispatch(startHeartRateScan());
+              }}
+            />
+          )}
+          {isConnected && (
+            <CTAButton
+              title="BLE WRITE"
+              onPress={() => {
+                bluetoothLeManager.sendBLEWriteString(myState);
+              }}
+            />
+          )}
+          {isConnected && (
+            <CTAButton
+              title="SEND HEIGHT"
+              onPress={() => {
+                // can move this to an actual function
+                const height = parseFloat(myHeight);
+                if (isNaN(height)) {
+                  console.log('Configure valid height!');
+                } else {
+                  console.log('My height: ' + height);
+                  bluetoothLeManager.sendBLEWriteHeight(height);
+                }
+              }}
+            />
+          )}
+          {isConnected && (
+            <CTAButton
+              title="RESET"
+              onPress={() => {
+                bluetoothLeManager.sendBLEWriteReset();
+              }}
+            />
+          )}
+          {isConnected && (
+            <CTAButton
+              title="GET GPS LOCATION"
+              onPress={() => {
+                getLocation();
+              }}
+            />
+          )}
+          <DeviceModal
+            devices={devices}
+            visible={isModalVisible}
+            closeModal={closeModal}
+            connectToPeripheral={connectToPeripheral}
+          />
+        </View>
+      </SafeAreaView>
+    );
+  }
+
   function MapScreen() {
     return (
       <SafeAreaView style={styles.container}>
@@ -470,6 +552,7 @@ const Home: FC = () => {
   }
   const HomeStack = createNativeStackNavigator();
   const MapStack = createNativeStackNavigator();
+  const BluetoothStack = createNativeStackNavigator();
   const SettingsDrawer = createDrawerNavigator();
   const BottomTab = createBottomTabNavigator();
 
@@ -504,9 +587,47 @@ const Home: FC = () => {
             ),
           }}
         />
+        <BottomTab.Screen
+          name="BluetoothTab"
+          component={BluetoothStackScreen}
+          options={{
+            headerShown: false,
+            tabBarLabel: 'Bluetooth',
+            tabBarIcon: ({color, size}) => (
+              <MaterialIcon name="bluetooth" color={color} size={30} />
+            ),
+          }}
+        />
       </BottomTab.Navigator>
     );
   }
+
+  const BluetoothStackScreen = ({navigation}) => (
+    <MapStack.Navigator
+      screenOptions={{
+        headerStyle: {backgroundColor: '#F08080'},
+        headerTintColor: '#fff',
+        headerTitleAlign: 'center',
+      }}>
+      <MapStack.Screen
+        name="BluetoothScreen"
+        component={BluetoothScreen}
+        options={{
+          title: 'OpticPace',
+          headerLeft: () => (
+            <Icon.Button
+              name="settings"
+              size={25}
+              backgroundColor="#F08080"
+              onPress={() => {
+                navigation.openDrawer();
+              }}
+            />
+          ),
+        }}
+      />
+    </MapStack.Navigator>
+  );
 
   const MapStackScreen = ({navigation}) => (
     <MapStack.Navigator
