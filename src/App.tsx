@@ -214,6 +214,7 @@ const Home: FC = () => {
           total_steps != 0 && distance != 0 ? distance / total_steps : 0;
 
         console.log('Distance per step (m/step):' + dist_per_step);
+        bluetoothLeManager.sendBLEWriteDistancePerStep(dist_per_step);
       }
     }
   };

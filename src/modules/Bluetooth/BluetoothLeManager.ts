@@ -18,6 +18,7 @@ const OP_BLE_UUID_OPCOM = 'bad92b28-d3ec-4362-808b-8113286cc3e3';
 const OP_BLE_UUID_RST = 'f8b6f810-0b8b-4dbd-9d2c-6acbd37b7d23';
 const OP_BLE_UUID_HEIGHT = '1833619c-85a8-4133-91ab-3094fb475f81';
 const OP_BLE_UUID_LOG = 'b9a32b56-b009-11ed-afa1-0242ac120002';
+const OP_BLE_UUID_DISPSTEP = 'f5fa6ead-ea0e-41ac-9a2e-afc170e83763';
 class BluetoothLeManager {
   bleManager: BleManager;
   device: Device | null;
@@ -158,6 +159,25 @@ class BluetoothLeManager {
       )
       .then(characteristic => {
         console.log('Characteristic: ' + characteristic.id);
+      });
+  };
+
+  sendBLEWriteDistancePerStep = async (dispstep: number) => {
+    console.log('SEND BLE WRITE DISTANCE PER STEP: ' + dispstep);
+
+    const buf = Buffer.alloc(8);
+    buf.writeDoubleLE(dispstep);
+    const output = buf.toString('base64');
+
+    await this.device?.discoverAllServicesAndCharacteristics();
+    this.device
+      ?.writeCharacteristicWithResponseForService(
+        OP_BLE_UUID_OPCOM,
+        OP_BLE_UUID_DISPSTEP,
+        output,
+      )
+      .then(Characteristic => {
+        console.log('Characteristic: ' + Characteristic.id);
       });
   };
 
