@@ -192,13 +192,6 @@ const Home: FC = () => {
       {tag: '2023-03-02', duration: "18:00", distance: 3000, pace: 6},
       {tag: '2023-03-02', duration: "18:00", distance: 3000, pace: 6},
     ];
-
-    let averagePace = 0;
-    if(historyData && historyData.length>0){
-      let totalPace = 0;
-      historyData.map(data => totalPace+=data.pace);
-      averagePace = totalPace/historyData.length;
-    }
     
     return (
       <SafeAreaView style={styles.container}>
@@ -228,9 +221,9 @@ const Home: FC = () => {
             renderItem={
               ({item}) => 
                 <View style={styles.listWrap}>
-                  <Text style={{paddingLeft: 25, paddingRight: 37, paddingTop: 5, paddingBottom: 5, flex:0.5, fontSize: 16, fontFamily: 'monospace'}}>{item.duration}</Text>
-                  <Text style={{paddingLeft: 27, paddingTop: 5, paddingBottom: 5, flex:0.35, fontSize: 16, fontFamily: 'monospace', backgroundColor: 'red'}}>{item.pace}</Text>
-                  <Text style={{paddingLeft: 35, paddingTop: 5, paddingBottom: 5, flex:0.5, fontSize: 16, fontFamily: 'monospace'}}>{item.distance}</Text>
+                  <Text style={{paddingLeft: 25, paddingRight: 37, paddingTop: 5, paddingBottom: 5, flex:0.5, fontSize: 16, fontFamily: 'monospace', backgroundColor: 'pink'}}>{item.duration}</Text>
+                  <Text style={{paddingLeft: 23, paddingTop: 5, paddingBottom: 5, flex:0.35, fontSize: 16, fontFamily: 'monospace', backgroundColor: 'pink'}}>{item.pace}</Text>
+                  <Text style={{paddingLeft: 37, paddingTop: 5, paddingBottom: 5, flex:0.5, fontSize: 16, fontFamily: 'monospace', backgroundColor: 'pink'}}>{item.distance}</Text>
                   <Text style={styles.listTag}>{item.tag}</Text>
                 </View>
             }
@@ -240,7 +233,7 @@ const Home: FC = () => {
         <View style={{paddingTop: 100}}>
           <Text style={{textAlign: 'center', fontSize: 20}}>No History Available</Text>
           <Text style={{textAlign: 'center', fontSize: 20}}>Start A Run To Create A Record</Text>
-          <FontAwesomeIcon icon={faStopwatch} size={70} style={{marginLeft: 150, marginTop: 50}}/>
+          <FontAwesomeIcon icon={faStopwatch} size={70} style={{marginLeft: 165, marginTop: 50}}/>
         </View>
       }
       </View>
@@ -605,6 +598,7 @@ const styles = StyleSheet.create({
     paddingTop: 5,
     paddingLeft: 25,
     paddingBottom: 5,
+    backgroundColor: 'pink'
   },
   listRow: {
     paddingLeft: 35,
