@@ -17,6 +17,7 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCircleUser } from '@fortawesome/free-solid-svg-icons';
+import FoundationIcon from 'react-native-vector-icons/Foundation'
 
 export function DrawerPage(props){
     const [connectBluetooth, setConnectBluetooth] = React.useState(false);
@@ -54,6 +55,18 @@ export function DrawerPage(props){
                         />
                         <DrawerItem
                             icon={({size}) => (
+                                <FoundationIcon
+                                    name="results"
+                                    color="black"
+                                    size={size}
+                                />
+                            )}
+                            style={{ backgroundColor: '#8c92ac' }}
+                            label="History"
+                            onPress={() => {props.navigation.navigate("Home", {screen: "HistoryTab"})}}
+                        />
+                        {/*<DrawerItem
+                            icon={({size}) => (
                                 <Icon
                                     name="map"
                                     color="black"
@@ -63,7 +76,7 @@ export function DrawerPage(props){
                             style={{ backgroundColor: '#8c92ac' }}
                             label="Map"
                             onPress={() => {props.navigation.navigate("Home", {screen: "MapTab"})}}
-                        />
+                        />*/}
                     </Drawer.Section>
                     <Drawer.Section style={{paddingBottom: 10}}>
                         <View style={{flexDirection: 'row', marginLeft: 100}}>

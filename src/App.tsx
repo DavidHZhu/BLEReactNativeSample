@@ -11,7 +11,7 @@ import 'react-native-gesture-handler';
 import React, {FC, useState} from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import {SafeAreaView, StyleSheet, Text, View, TextInput, TouchableOpacity} from 'react-native';
+import {SafeAreaView, StyleSheet, Text, View, TextInput, TouchableOpacity, FlatList} from 'react-native';
 import {Provider, useDispatch, useSelector} from 'react-redux';
 import CTAButton from './components/CTAButton';
 import DeviceModal from './components/DeviceConnectionModal';
@@ -23,9 +23,15 @@ import {
 } from './modules/Bluetooth/bluetooth.reducer';
 import {RootState, store} from './store/store';
 import bluetoothLeManager from './modules/Bluetooth/BluetoothLeManager';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faStopwatch } from '@fortawesome/free-solid-svg-icons';
 import RNLocation from 'react-native-location';
 import Icon from 'react-native-vector-icons/Ionicons'
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons'
+import SimpleLineIcons from 'react-native-vector-icons/SimpleLineIcons'
+import FontistoIcons from 'react-native-vector-icons/Fontisto'
+import EntypoIcon from 'react-native-vector-icons/Entypo'
+import FoundationIcon from 'react-native-vector-icons/Foundation'
 import base64 from 'react-native-base64';
 import { inlineStyles } from 'react-native-svg';
 import { toHtml } from '@fortawesome/fontawesome-svg-core';
@@ -173,6 +179,68 @@ const Home: FC = () => {
     }
   };
 
+  function HistoryScreen() {
+    let historyData = [
+      {tag: '2023-03-02', duration: "18:00", distance: 3000, pace: 6},
+      {tag: '2023-03-02', duration: "18:00", distance: 3000, pace: 6},
+      {tag: '2023-03-02', duration: "18:00", distance: 3000, pace: 6},
+      {tag: '2023-03-02', duration: "18:00", distance: 3000, pace: 6},
+      {tag: '2023-03-02', duration: "18:00", distance: 3000, pace: 6},
+      {tag: '2023-03-02', duration: "18:00", distance: 3000, pace: 6},
+      {tag: '2023-03-02', duration: "18:00", distance: 3000, pace: 6},
+      {tag: '2023-03-02', duration: "18:00", distance: 3000, pace: 6},
+      {tag: '2023-03-02', duration: "18:00", distance: 3000, pace: 6},
+      {tag: '2023-03-02', duration: "18:00", distance: 3000, pace: 6},
+    ];
+    
+    return (
+      <SafeAreaView style={styles.container}>
+      <View>
+      {(historyData && historyData.length>0) ?
+        <View style={{paddingTop: 5}}>
+          <View style={styles.listWrap}>
+            <View style={{flexDirection: 'row'}}>
+              <Text style={{paddingLeft: 6, paddingTop: 5, paddingBottom: 5, fontSize: 19, fontFamily: "serif"}}>Duration</Text>
+              <EntypoIcon name='stopwatch' size={16} style={{paddingTop: 10, paddingLeft: 1}}/>
+              <Text style={{paddingLeft: 13, paddingTop: 5, paddingBottom: 5, fontSize: 19, fontFamily: "serif"}}>Pace</Text>
+              <SimpleLineIcons name='speedometer' size={16} style={{paddingTop: 10, paddingLeft: 1}}/>
+              <Text style={{paddingLeft: 13, paddingTop: 5, paddingBottom: 5, fontSize: 19, fontFamily: "serif"}}>Distance</Text>
+              <MaterialIcon name='map-marker-distance' size={16} style={{paddingTop: 10, paddingLeft: 1}}/>
+              <Text style={{paddingLeft: 20, paddingTop: 5, paddingBottom: 5, fontSize: 19, fontFamily: "serif"}}>Date</Text>
+              <FontistoIcons name='date' size={16} style={{paddingTop: 10, paddingLeft: 1}}/>
+            </View>
+            <View style={{flexDirection: 'row'}}>
+            <Text style={{paddingLeft: 15, paddingTop: 5, paddingBottom: 5, fontSize: 10,}}>MIN:SECONDS</Text>
+              <Text style={{paddingLeft: 40, paddingTop: 5, paddingBottom: 5, fontSize: 10,}}>MIN/KM</Text>
+              <Text style={{paddingLeft: 50, paddingTop: 5, paddingBottom: 5, fontSize: 10,}}>METERS</Text>
+              <Text style={{paddingLeft: 40, paddingTop: 5, paddingBottom: 5, fontSize: 10,}}>YEAR-MONTH-DAY</Text>
+            </View>
+          </View>
+          <FlatList
+            data={historyData}
+            renderItem={
+              ({item}) => 
+                <View style={styles.listWrap}>
+                  <Text style={{paddingLeft: 25, paddingRight: 37, paddingTop: 5, paddingBottom: 5, flex:0.5, fontSize: 16, fontFamily: 'monospace', backgroundColor: 'pink'}}>{item.duration}</Text>
+                  <Text style={{paddingLeft: 23, paddingTop: 5, paddingBottom: 5, flex:0.35, fontSize: 16, fontFamily: 'monospace', backgroundColor: 'pink'}}>{item.pace}</Text>
+                  <Text style={{paddingLeft: 37, paddingTop: 5, paddingBottom: 5, flex:0.5, fontSize: 16, fontFamily: 'monospace', backgroundColor: 'pink'}}>{item.distance}</Text>
+                  <Text style={styles.listTag}>{item.tag}</Text>
+                </View>
+            }
+          />
+        </View>
+        : 
+        <View style={{paddingTop: 100}}>
+          <Text style={{textAlign: 'center', fontSize: 20}}>No History Available</Text>
+          <Text style={{textAlign: 'center', fontSize: 20}}>Start A Run To Create A Record</Text>
+          <FontAwesomeIcon icon={faStopwatch} size={70} style={{marginLeft: 165, marginTop: 50}}/>
+        </View>
+      }
+      </View>
+      </SafeAreaView>
+    );
+  }
+
   function MapScreen() {
     return (
       <SafeAreaView style={styles.container}>
@@ -274,6 +342,7 @@ const Home: FC = () => {
   }
   const HomeStack = createNativeStackNavigator();
   const MapStack = createNativeStackNavigator();
+  const HistoryStack = createNativeStackNavigator();
   const SettingsDrawer = createDrawerNavigator();
   const BottomTab = createBottomTabNavigator();
 
@@ -292,6 +361,17 @@ const Home: FC = () => {
               name="home-sharp"
               color={color}
               size={size}
+            />
+          ),
+        }}/>
+        <BottomTab.Screen name="HistoryTab" component={HistoryStackScreen} options={{
+          headerShown: false,
+          tabBarLabel: "History",
+          tabBarIcon: ({color, size}) => (
+            <FoundationIcon
+              name="results"
+              color={color}
+              size={30}
             />
           ),
         }}/>
@@ -330,6 +410,28 @@ const Home: FC = () => {
               />
             )}}/>
     </MapStack.Navigator>
+  );
+
+  const HistoryStackScreen = ({navigation}) => (
+    <HistoryStack.Navigator screenOptions={{
+      headerStyle: { backgroundColor: '#F08080' },
+      headerTintColor: '#fff',
+      headerTitleAlign: 'center'
+    }}>
+        <HistoryStack.Screen
+          name="HistoryScreen"
+          component={HistoryScreen}
+          options={{
+            title: 'OpticPace',
+            headerLeft: () => (
+              <Icon.Button 
+                name='settings'
+                size={25}
+                backgroundColor='#F08080'
+                onPress={() => { navigation.openDrawer() }}
+              />
+            )}}/>
+    </HistoryStack.Navigator>
   );
 
   const HomeStackScreen = ({navigation}) => (
@@ -484,7 +586,27 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center'
-  }
+  },
+  listWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    borderBottomWidth: 0.5,
+  },
+  listTag: {
+    flex:1,
+    fontSize: 17,
+    paddingTop: 5,
+    paddingLeft: 25,
+    paddingBottom: 5,
+    backgroundColor: 'pink'
+  },
+  listRow: {
+    paddingLeft: 35,
+    paddingTop: 5,
+    paddingBottom: 5,
+    flex:0.5,
+    fontSize: 16,
+  },
 });
 
 export default App;
