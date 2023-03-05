@@ -5,7 +5,7 @@ import SignUpScreen from './SignUpScreen';
 
 const AuthStack = createNativeStackNavigator();
 
-const AuthStackScreen = ({navigation}) => (
+const AuthStackScreen = () => (
     <AuthStack.Navigator headerMode='none'>
         <AuthStack.Screen options={{headerShown: false}} name="SignInScreen" component={SignInScreen}/>
         <AuthStack.Screen options={{headerShown: false}} name="SignUpScreen" component={SignUpScreen}/>

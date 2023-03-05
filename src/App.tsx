@@ -44,6 +44,7 @@ import { createDrawerNavigator } from '@react-navigation/drawer';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { DrawerPage} from './screens/DrawerContent';
 import AuthStackScreen from './screens/AuthenticationStack';
+import { AuthContext } from './components/context';
 
 // RNLocation.configure({
 //  distanceFilter: null
@@ -65,6 +66,7 @@ function sleep(ms) {
 const Home: FC = () => {
   const dispatch = useDispatch();
   const [count, setCount] = useState(0);
+  const [authToken, setAuthToken] = useState(null);
   const [latitude, setLatitude] = useState(0 || null);
   const [longitude, setLongitude] = useState(0 || null);
   const [isDuration, setIsDuration] = useState(true);
@@ -76,6 +78,20 @@ const Home: FC = () => {
     pauseButton: false,
     stopButton: false,
 });
+
+  const authContext = React.useMemo(() => ({
+    signIn: () => {
+      setAuthToken(1);
+    },
+    signOut: () => {
+      setAuthToken(null);
+    },
+    signUp: () => {
+      setAuthToken(1);
+    },
+    userName: 'name',
+    userEmail: 'email',
+  }), []);
 
   const toggleStartPauseButton = () => {
     setButtonInfo({
@@ -228,12 +244,17 @@ const Home: FC = () => {
                 </View>
             }
           />
+          <View style={{paddingTop: 30, paddingLeft: 90, paddingRight: 100}}>
+            <TouchableOpacity onPress={()=>{stopButton()}} style={{backgroundColor: 'grey', borderRadius: 10, paddingVertical: 5, paddingHorizontal: 25}}>
+              <Text style={{textAlign: 'center'}}>Clear History</Text>
+            </TouchableOpacity>
+          </View>
         </View>
         : 
         <View style={{paddingTop: 100}}>
           <Text style={{textAlign: 'center', fontSize: 20}}>No History Available</Text>
           <Text style={{textAlign: 'center', fontSize: 20}}>Start A Run To Create A Record</Text>
-          <FontAwesomeIcon icon={faStopwatch} size={70} style={{marginLeft: 165, marginTop: 50}}/>
+          <FontAwesomeIcon icon={faStopwatch} size={70} style={{marginLeft: 160, marginTop: 50}}/>
         </View>
       }
       </View>
@@ -459,21 +480,24 @@ const Home: FC = () => {
   const [myState, setMyState] = useState('');
   const [myHeight, setMyHeight] = useState('');
   return (
-    <NavigationContainer>
-      {/*<AuthStackScreen/>*/}
-      <SettingsDrawer.Navigator initialRouteName='Home' drawerContent={ props => <DrawerPage {...props}
-        showAveragePace={isAveragePace}
-        showCurrentPace={isCurrentPace}
-        showDuration={isDuration}
-        showKilometers={isKilometers}
-        toggleShowAveragePace={toggleAveragePace}
-        toggleShowCurrentPace={toggleCurrentPace}
-        toggleShowDuration={toggleDuration}
-        toggleShowKilometers={toggleKilometers}
-      />}>
-        <SettingsDrawer.Screen name="Home" component={TabScreen} options={{headerShown: false, headerTitle: 'Home'}}/>
-      </SettingsDrawer.Navigator>
-    </NavigationContainer>
+    <AuthContext.Provider value={authContext}>
+      <NavigationContainer>
+        {authToken !== null ?
+          <SettingsDrawer.Navigator initialRouteName='Home' drawerContent={ props => <DrawerPage {...props}
+            showAveragePace={isAveragePace}
+            showCurrentPace={isCurrentPace}
+            showDuration={isDuration}
+            showKilometers={isKilometers}
+            toggleShowAveragePace={toggleAveragePace}
+            toggleShowCurrentPace={toggleCurrentPace}
+            toggleShowDuration={toggleDuration}
+            toggleShowKilometers={toggleKilometers}
+          />}>
+            <SettingsDrawer.Screen name="Home" component={TabScreen} options={{headerShown: false, headerTitle: 'Home'}}/>
+          </SettingsDrawer.Navigator>
+        : <AuthStackScreen/>}
+      </NavigationContainer>
+    </AuthContext.Provider>
     /*<SafeAreaView style={styles.container}>
       {isConnected && (
         <TextInput
