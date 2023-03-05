@@ -176,7 +176,7 @@ const Home: FC = () => {
       // given a time window, calculate how much distance is covered
       // let's say in x seconds, fetching gps coords for every second
       // store gps coords and then at the end of this time window, compute the distance and send, rinse and repeat
-
+      
       while (true) {
         const curr_gps_data = [];
         const start = await bluetoothLeManager.getBLEStepLog();
@@ -184,6 +184,7 @@ const Home: FC = () => {
           // break? here, we have to stop though,
           continue;
         }
+        console.log("Start steps:" + start.step_count);
 
         console.log('Starting poll....');
         for (let i = 0; i < 20; i++) {
@@ -208,8 +209,10 @@ const Home: FC = () => {
           continue;
         }
         const total_steps = end.step_count - start.step_count;
-
+        // console.log("session id:" + end.session_code);
+        console.log("end steps: " + end.step_count);
         console.log('Distance:' + distance);
+        console.log('Total steps:' + total_steps);
         const dist_per_step =
           total_steps != 0 && distance != 0 ? distance / total_steps : 0;
 
@@ -523,7 +526,7 @@ const Home: FC = () => {
             </View>
           )}
         </View>
-        {/*   <View style={styles.heartRateTitleWrapper}>
+          {/* <View style={styles.heartRateTitleWrapper}>
           {isConnected ? (
             <>
               <Text style={styles.heartRateTitleText}>Your Pace Is:</Text>
@@ -534,20 +537,20 @@ const Home: FC = () => {
               Please Connect to a Arduino Nano BLE 33 {count}
             </Text>
           )}
-        </View>
-        {isConnected && (
+        </View> */}
+        {/* {isConnected && (
           <TextInput
             placeholder={'placeholder'}
             onChangeText={text => setMyState(text)}
           />
-        )}
+        )} */}
         {true && (
           <TextInput
             placeholder={'placeholder'}
             onChangeText={text => setMyHeight(text)}
             style={styles.input}
           />
-        )}*/}
+        )}
       </SafeAreaView>
     );
   }

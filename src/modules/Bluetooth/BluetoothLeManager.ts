@@ -186,11 +186,11 @@ class BluetoothLeManager {
     return this.device
       ?.readCharacteristicForService(OP_BLE_UUID_OPCOM, OP_BLE_UUID_LOG)
       .then(characteristic => {
-        const data = Buffer.from(base64.decode(characteristic?.value ?? ''));
-        // maybe doing this wrong, need to test this
-        const start_code: number = data.readUInt32LE();
-        const step_count: number = data.readUInt32LE(4);
-        const avg_acceleration: number = data.readFloatLE(8);
+        const decode = base64.decode(characteristic?.value ?? '');
+        
+        const start_code: number = Buffer.from(decode.slice(0,4)).readInt32LE();
+        const step_count: number = Buffer.from(decode.slice(4,8)).readUInt32LE();
+        const avg_acceleration: number = Buffer.from(decode.slice(8,decode.length)).readFloatLE();
 
         const result: StepCountResponse = {
           session_code: start_code,
