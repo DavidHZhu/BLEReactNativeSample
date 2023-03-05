@@ -63,6 +63,27 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+const formatStopWatch = (number : number) => (number <= 9 ? `0${number}` : number);
+
+function stopWatchDisplay(cs : number) {
+  if (cs < 0) {
+    return '00:00:00';
+  }
+  if (cs < 100) {
+    return `00:00:${formatStopWatch(cs)}`
+  } else {
+    let centiSeconds = cs%100;
+    let seconds = (cs-centiSeconds)/100;
+    if(seconds < 60){
+      return `00:${formatStopWatch(seconds)}:${formatStopWatch(centiSeconds)}`;
+    } else {
+      let minutes = (seconds - seconds%60)/60;
+      seconds = seconds%60;
+      return `${formatStopWatch(minutes)}:${formatStopWatch(seconds)}:${formatStopWatch(centiSeconds)}`;
+    }
+  }
+}
+
 const Home: FC = () => {
   const dispatch = useDispatch();
   const [count, setCount] = useState(0);
