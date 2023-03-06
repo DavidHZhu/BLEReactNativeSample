@@ -3,3 +3,9 @@ export type StepCountResponse = {
   step_count: number;
   avg_acceleration: number;
 };
+
+export type SimplifiedLocation =  {
+  lat: number;
+  lon: number;
+  timestamp: number;
+}

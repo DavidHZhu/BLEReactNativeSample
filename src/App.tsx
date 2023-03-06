@@ -16,7 +16,7 @@ import {Provider, useDispatch, useSelector} from 'react-redux';
 import CTAButton from './components/CTAButton';
 import DeviceModal from './components/DeviceConnectionModal';
 import {BluetoothPeripheral} from './models/BluetoothPeripheral';
-import {StepCountResponse} from './models/StepCountResponse';
+import {StepCountResponse, SimplifiedLocation} from './models/StepCountResponse';
 import {User} from './models/Users';
 import {
   initiateConnection,
@@ -107,10 +107,15 @@ const Home: FC = () => {
     startButton: true,
     pauseButton: false,
     stopButton: false,
+    isRunning: false,
   });
-  const [curr_distance, setCurrDistance] = useState(0);
-  
-  const [locationSubscription, setLocationSubscription] = useState(RNLocation.subscribeToLocationUpdates(locations => locations));
+  const [total_distance, setTotalDistance] = useState(0);
+  const [speed, setCurrSpeed] = useState(0);
+  const [average_speed, setAverageSpeed] = useState(0);
+  // const [CSeconds, setCSeconds] = useState(0);
+
+
+  // const [locationSubscription, setLocationSubscription] = useState(RNLocation.subscribeToLocationUpdates(locations => locations));
 
   let start: StepCountResponse | undefined = {
     session_code: 0,
@@ -127,14 +132,21 @@ const Home: FC = () => {
   let users: User[] = [testUser];
 
   let curr_locations: any[] = [];
+  // these will be by default m/s
+  let speeds: number[] = [];
+  let prev_loc: SimplifiedLocation | null = null;
   let init_count = 0;
-  let limit = 15;
+  let limit = 1;
+  let curr_distance = 0;
+  let total_dist = 0;
+  let locationSubscription = RNLocation.subscribeToLocationUpdates(locations => locations);
 
   const stopButton = () => {
     setButtonInfo({
       startButton: true,
       pauseButton: false,
       stopButton: false,
+      isRunning: false,
     });
   };
 
@@ -222,7 +234,7 @@ const Home: FC = () => {
     console.log("Start Session!");
 
     GpsKalman.startSession();
-    let x = RNLocation.subscribeToLocationUpdates(
+    locationSubscription = RNLocation.subscribeToLocationUpdates(
       async locations => {
         // if we have a location
         // get distance => normalise?
@@ -234,6 +246,7 @@ const Home: FC = () => {
 
           init_count = 0;
           start = new_start;
+          prev_loc = null;
         } else {
           // get end steps
           const end = await bluetoothLeManager.getBLEStepLog();
@@ -241,6 +254,7 @@ const Home: FC = () => {
             // session codes are different => different sessions, a reset happened inbetween
             console.log("end undefined....", end, start);
             start = end;
+            prev_loc = null;
           } else {
             console.log("New Location:", locations[0]);
             console.log("start step: " + start.step_count);
@@ -249,14 +263,40 @@ const Home: FC = () => {
               const firstLoc = locations[0];
               const filteredLoc = await GpsKalman.process(firstLoc.latitude, firstLoc.longitude, firstLoc.altitude, firstLoc.timestamp);
               if (init_count >= limit) {
+                if (prev_loc == null) {
+                  prev_loc = {
+                    lat: filteredLoc.latitude,
+                    lon: filteredLoc.longitude,
+                    timestamp: locations[0].timestamp,
+                  }
+                } else {
+                  const curr_loc = {
+                    lat: filteredLoc.latitude,
+                    lon: filteredLoc.longitude,
+                    timestamp: locations[0].timestamp,
+                  };
+                  const location_pair = [prev_loc, curr_loc];
+                  const pair_distance = geolib.getPathLength(location_pair);
+                  console.log("pair distance:" + pair_distance);
+                  const time_taken = location_pair[1].timestamp - location_pair[0].timestamp;
+                  const curr_speed = time_taken != 0 ? pair_distance / time_taken : 0.0;
+                  speeds.push(curr_speed);
+                  prev_loc = curr_loc;
+
+                  setCurrSpeed(Number(curr_speed.toFixed(2)));
+                  setAverageSpeed(Number((speeds.reduce((acc, curr) => acc + curr, 0)/speeds.length).toFixed(2)));
+                  total_dist = total_dist + pair_distance;
+                  setTotalDistance(total_dist);
+                }
                 curr_locations.push(filteredLoc);
                 // const new_locations = [...curr_locations, filteredLoc];
                 console.log("filtered Location:", filteredLoc.latitude, filteredLoc.longitude);
                 console.log("Total Distance:" + geolib.getPathLength(curr_locations));
-                setCurrDistance(geolib.getPathLength(curr_locations));
+                curr_distance = geolib.getPathLength(curr_locations)
                 // setCurrLocations(new_locations);
               } else {
                 init_count += 1;
+                prev_loc = null;
               }
             } else {
               // curr_distance is greater => send the distance
@@ -264,11 +304,13 @@ const Home: FC = () => {
               const total_steps = end.step_count - start.step_count;
               const dispstep = total_steps != 0 ? curr_distance / total_steps : 0.0;
               bluetoothLeManager.sendBLEWriteDistancePerStep(dispstep);
-              GpsKalman.startSession();
-              init_count = 0;
-              setCurrDistance(0);
+              // GpsKalman.startSession();
+              // init_count = 0;
+              // setCurrDistance(0);
+              curr_distance = 0;
               curr_locations = [];
               start = end;
+              prev_loc = null;
             }
           }
         }
@@ -339,7 +381,7 @@ const Home: FC = () => {
         console.log('Starting poll....');
         GpsKalman.startSession();
         let distance_travelled = 0;
-        setCurrDistance(distance_travelled);
+        // setCurrDistance(distance_travelled);
         // prev, next => calculate distance then =>
         let end = undefined;
         let isNewSession = false;
@@ -443,14 +485,14 @@ const Home: FC = () => {
               <Text style={styles.heartRateText}>LONG: {longitude}</Text>
             </>
           )} */}
-          {isConnected && (
+          {/* {isConnected && (
             <CTAButton
               title="Get BLE Read"
               onPress={() => {
-                dispatch(startHeartRateScan());
+                bluetoothLeManager.getBLESpeedLog();
               }}
             />
-          )}
+          )} */}
           {isConnected && (
             <CTAButton
               title="BLE WRITE"
@@ -593,8 +635,8 @@ const Home: FC = () => {
   }
 
   function HomeScreen() {
-
     const [CSeconds, setCSeconds] = useState(0);
+
     const [buttonInfo, setButtonInfo] = React.useState({
       startButton: true,
       pauseButton: false,
@@ -650,29 +692,29 @@ const Home: FC = () => {
           {(isAveragePace || isCurrentPace) && <View style={{marginLeft: 15, marginRight: 15, borderBottomWidth: 2, borderBottomColor: '#F08080', flexDirection: 'row', alignContent: 'center', alignItems: 'center', justifyContent: 'space-evenly'}}>
             {isCurrentPace && <View>
               <Text style={{textAlign: 'center', fontSize: 25, marginBottom: 15, marginTop: 15, color: '#E9967A'}}>Current Pace</Text>
-              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 10}}>0</Text>
-              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 20}}>km/h</Text>
+              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 10}}>{speed}</Text>
+              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 20}}>m/s</Text>
             </View>}
             {isCurrentPace && isAveragePace && <View style={{height: '80%', width: 1.5, backgroundColor: '#F08080'}}></View>}
             {isAveragePace && <View>
               <Text style={{textAlign: 'center', fontSize: 25, marginBottom: 15, marginTop: 15, color: '#E9967A'}}>Average Pace</Text>
-              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 10}}>0</Text>
-              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 20}}>km/h</Text>
+              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 10}}>{average_speed}</Text>
+              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 20}}>m/s</Text>
             </View>}
           </View>}
           {isKilometers && <View style={{marginTop: 15, marginBottom: 15, marginLeft: 15, marginRight: 15, borderBottomWidth: 2, borderBottomColor: '#F08080'}}>
             <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 5, color: '#E9967A'}}>Distance</Text>
-            <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 10}}>{curr_distance} m </Text>
+            <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 10}}>{total_distance} m </Text>
           </View>}
         </View>
         <View style={{flexDirection: 'row', alignContent: 'center', alignItems: 'center', justifyContent: 'space-evenly', marginTop: 20}}>
           {buttonInfo.startButton && <View>
-            <TouchableOpacity onPress={()=>{toggleStartPauseButton()}} style={{backgroundColor: '#67AE33', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
+            <TouchableOpacity onPress={()=>{{toggleStartPauseButton(); getGPSLocation();}}} style={{backgroundColor: '#67AE33', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
               <Icon name='play-circle-outline' size={30} color="white"/>
             </TouchableOpacity>
           </View>}
           {buttonInfo.pauseButton && <View>
-            <TouchableOpacity onPress={()=>{toggleStartPauseButton()}} style={{backgroundColor: '#67AE33', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
+            <TouchableOpacity onPress={()=>{toggleStartPauseButton(); locationSubscription();}} style={{backgroundColor: '#67AE33', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
               <Icon name='pause-circle-outline' size={30} color="white"/>
             </TouchableOpacity>
           </View>}
