@@ -70,7 +70,7 @@ export function DrawerPage(props){
                             label="History"
                             onPress={() => {props.navigation.navigate("Home", {screen: "HistoryTab"})}}
                         />
-                        {/*<DrawerItem
+                        <DrawerItem
                             icon={({size}) => (
                                 <Icon
                                     name="map"
@@ -81,7 +81,20 @@ export function DrawerPage(props){
                             style={{ backgroundColor: '#8c92ac' }}
                             label="Map"
                             onPress={() => {props.navigation.navigate("Home", {screen: "MapTab"})}}
-                        />*/}
+                        />
+                        <DrawerItem
+                            icon={({size}) => (
+                                <Icon
+                                    name="bluetooth"
+                                    color="black"
+                                    size={size}
+                                    style={styles.blueTooth}
+                                />
+                            )}
+                            style={{ backgroundColor: '#8c92ac' }}
+                            label="Bluetooth"
+                            onPress={() => {props.navigation.navigate("Home", {screen: "BluetoothTab"})}}
+                        />
                     </Drawer.Section>
                     <Drawer.Section style={{paddingBottom: 10}}>
                         <View style={{flexDirection: 'row', marginLeft: 100}}>
