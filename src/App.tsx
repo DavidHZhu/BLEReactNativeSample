@@ -139,6 +139,9 @@ const Home: FC = () => {
 
   // const [locationSubscription, setLocationSubscription] = useState(RNLocation.subscribeToLocationUpdates(locations => locations));
 
+  let timestamp = 0;
+  let intervalId = null;
+
   let start: StepCountResponse | undefined = {
     session_code: 0,
     step_count: 0,
@@ -187,12 +190,12 @@ const Home: FC = () => {
 
   const stopButton = () => {
     setButtonInfo({
-      startButton: true,
-      pauseButton: false,
-      stopButton: false,
-      isRunning: false,
+        startButton: true,
+        pauseButton: false,
+        stopButton: false,
+        isRunning: false,
     });
-  };
+  }
 
   const authContext = React.useMemo(() => ({
     userName: '',
@@ -724,16 +727,14 @@ const Home: FC = () => {
     ];
 
     useEffect(() => {
-      if (buttonInfo.isRunning === true){
-        BackgroundTimer.runBackgroundTimer(() => {
-          setCSeconds((prev)=>{ return prev+1 });
-        }, 10);
-      } else {
-        BackgroundTimer.stopBackgroundTimer();
-        setCSeconds(0);
+      if(buttonInfo.isRunning){
+          intervalId = setInterval(() => {
+            timestamp+=1;
+      },1000)} else {
+        clearInterval(intervalId);
       }
       return () => {
-        BackgroundTimer.stopBackgroundTimer();
+        clearInterval(intervalId);
       };
     }, [buttonInfo.isRunning]);
   
@@ -758,8 +759,8 @@ const Home: FC = () => {
           isRunning: false,
       });
       const newRun: Run = {
-        duration: timeDisplay(CSeconds),
-        avg_pace: '3',
+        duration: timeDisplay(timestamp),
+        avg_pace: String(total_distance*0.06/timestamp),
         distance: curr_distance.toString(),
         date: new Date().toISOString().split('T')[0],
       }
@@ -816,7 +817,9 @@ const Home: FC = () => {
         <View style={{flexDirection: 'column'}}>
           {isDuration && <View style={{marginTop: 10, marginLeft: 15, marginRight: 15, borderWidth: 2, borderRadius: 10, borderColor: '#F08080'}}>
             <Text style={{textAlign: 'center', fontSize: 35, color: '#E9967A'}}>Duration</Text>
-            <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 5}}>{displayWatch()}</Text>
+            {buttonInfo.isRunning ? <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 5}}>Run Started</Text>
+              : <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 5}}>Run Complete</Text>
+            }
           </View>}
           {(isAveragePace || isCurrentPace) && <View style={{marginLeft: 15, marginRight: 15, borderBottomWidth: 2, borderBottomColor: '#F08080', flexDirection: 'row', alignContent: 'center', alignItems: 'center', justifyContent: 'space-evenly'}}>
             {isCurrentPace && <View>
@@ -1081,7 +1084,7 @@ const Home: FC = () => {
   const [myHeight, setMyHeight] = useState('');
   return (
     <AuthContext.Provider value={authContext}>
-     <NavigationContainer>
+      <NavigationContainer>
         {authToken !== null ?
           <SettingsDrawer.Navigator initialRouteName='Home' drawerContent={ props => <DrawerPage {...props}
             showAveragePace={isAveragePace}
