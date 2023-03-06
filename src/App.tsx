@@ -17,6 +17,7 @@ import CTAButton from './components/CTAButton';
 import DeviceModal from './components/DeviceConnectionModal';
 import {BluetoothPeripheral} from './models/BluetoothPeripheral';
 import {StepCountResponse} from './models/StepCountResponse';
+import {User} from './models/Users';
 import {
   initiateConnection,
   scanForPeripherals,
@@ -117,6 +118,14 @@ const Home: FC = () => {
     avg_acceleration: 0.0
   };
 
+  let testUser: User = {
+    name: "Guest",
+    email: "admin",
+    password: "pass",
+    runs: [],
+  };
+  let users: User[] = [testUser];
+
   let curr_locations: any[] = [];
   let init_count = 0;
   let limit = 15;
@@ -130,8 +139,15 @@ const Home: FC = () => {
   };
 
   const authContext = React.useMemo(() => ({
-    signIn: () => {
-      setAuthToken(1);
+    signIn: (email: String, password: String) => {
+      console.log("given", email, password);
+      console.log(users);
+      console.log(users.find(user => user.email == email && user.password == password));
+      if (users.find(user => user.email == email && user.password == password)) {
+        setAuthToken(1);
+      } else {
+        console.log("incorrect login");
+      }
     },
     signOut: () => {
       setAuthToken(null);
