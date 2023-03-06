@@ -94,6 +94,25 @@ function stopWatchDisplay(cs : number) {
   }
 }
 
+function timeDisplay(cs : number) {
+  if (cs < 0) {
+    return '00:00';
+  }
+  if (cs < 100) {
+    return `00:${formatStopWatch(cs)}`
+  } else {
+    let centiSeconds = cs%100;
+    let seconds = (cs-centiSeconds)/100;
+    if(seconds < 60){
+      return `00:${formatStopWatch(seconds)}`;
+    } else {
+      let minutes = (seconds - seconds%60)/60;
+      seconds = seconds%60;
+      return `${formatStopWatch(minutes)}:${formatStopWatch(seconds)}`;
+    }
+  }
+}
+
 const Home: FC = () => {
   const dispatch = useDispatch();
   const [count, setCount] = useState(0);
@@ -142,8 +161,7 @@ const Home: FC = () => {
   ];
 
   let testUser: User = {
-    name: "Guest",
-    email: "admin",
+    username: "admin",
     password: "pass",
     runs: testData,
   };
@@ -164,20 +182,16 @@ const Home: FC = () => {
 
   const authContext = React.useMemo(() => ({
     userName: '',
-    userEmail: '',
     user: {
-      name: 'name',
-      email: 'email',
+      username: 'email',
       password: 'password',
       runs: [],
     } as User,
-    signIn: (email: string, password: string) => {
-      if (users.find(user => user.email == email && user.password == password)) {
-        authContext.user = users.find(user => user.email == email)!;
-        let userName = users.find(user => user.email == email)!.name
+    signIn: (username: string, password: string) => {
+      if (users.find(user => user.username == username && user.password == password)) {
+        authContext.user = users.find(user => user.username == username)!;
         setAuthToken(1);
-        authContext.userEmail = email;
-        authContext.userName = userName;
+        authContext.userName = username;
       } else {
         console.log("incorrect login");
       }
@@ -185,19 +199,17 @@ const Home: FC = () => {
     signOut: () => {
       setAuthToken(null);
     },
-    signUp: (name: string, email: string, password: string) => {
-      if (users.find(user => user.email == email)) {
+    signUp: (username: string, password: string) => {
+      if (users.find(user => user.username == username)) {
         console.log("email already in use");
       } else {
         const newUser: User = {
-          name: name,
-          email: email,
+          username: username,
           password: password,
           runs: [],
         }
         authContext.user = newUser;
-        authContext.userEmail = email;
-        authContext.userName = name;
+        authContext.userName = username;
         users.push(newUser);
         setAuthToken(1);
       }
@@ -564,6 +576,11 @@ const Home: FC = () => {
     return (
       <SafeAreaView style={styles.container}>
       <View>
+        <View style={{paddingTop: 30, paddingLeft: 90, paddingRight: 100}}>
+              <TouchableOpacity onPress={()=>{stopButton()}} style={{backgroundColor: 'grey', borderRadius: 10, paddingVertical: 5, paddingHorizontal: 25}}>
+                <Text style={{textAlign: 'center'}}>Refresh Runs</Text>
+              </TouchableOpacity>
+        </View>
       {(runData && runData.length>0) ?
         <View style={{paddingTop: 5}}>
           <View style={styles.listWrap}>
@@ -581,7 +598,7 @@ const Home: FC = () => {
             <Text style={{paddingLeft: 15, paddingTop: 5, paddingBottom: 5, fontSize: 10,}}>MIN:SECONDS</Text>
               <Text style={{paddingLeft: 40, paddingTop: 5, paddingBottom: 5, fontSize: 10,}}>MIN/KM</Text>
               <Text style={{paddingLeft: 50, paddingTop: 5, paddingBottom: 5, fontSize: 10,}}>METERS</Text>
-              <Text style={{paddingLeft: 40, paddingTop: 5, paddingBottom: 5, fontSize: 10,}}>YEAR-MONTH-DAY</Text>
+              <Text style={{paddingLeft: 40, paddingTop: 5, paddingBottom: 5, fontSize: 10,}}>YYYY-MM-DD</Text>
             </View>
           </View>
           <FlatList
@@ -589,22 +606,17 @@ const Home: FC = () => {
             renderItem={
               ({item}) => 
                 <View style={styles.listWrap}>
-                  <Text style={{paddingLeft: 25, paddingRight: 37, paddingTop: 5, paddingBottom: 5, flex:0.5, fontSize: 16, fontFamily: 'monospace', backgroundColor: 'pink'}}>{item.duration}</Text>
+                  <Text style={{paddingLeft: 25, paddingRight: 37, paddingTop: 5, paddingBottom: 5, flex:0.65, fontSize: 16, fontFamily: 'monospace', backgroundColor: 'pink'}}>{item.duration}</Text>
                   <Text style={{paddingLeft: 23, paddingTop: 5, paddingBottom: 5, flex:0.35, fontSize: 16, fontFamily: 'monospace', backgroundColor: 'pink'}}>{item.avg_pace}</Text>
                   <Text style={{paddingLeft: 37, paddingTop: 5, paddingBottom: 5, flex:0.5, fontSize: 16, fontFamily: 'monospace', backgroundColor: 'pink'}}>{item.distance}</Text>
                   <Text style={styles.listTag}>{item.date}</Text>
                 </View>
             }
           />
-          <View style={{paddingTop: 30, paddingLeft: 90, paddingRight: 100}}>
-            <TouchableOpacity onPress={()=>{stopButton()}} style={{backgroundColor: 'grey', borderRadius: 10, paddingVertical: 5, paddingHorizontal: 25}}>
-              <Text style={{textAlign: 'center'}}>Clear History</Text>
-            </TouchableOpacity>
-          </View>
         </View>
         : 
         <View style={{paddingTop: 100}}>
-          <Text style={{textAlign: 'center', fontSize: 20}}>No History Available</Text>
+          {/* <Text style={{textAlign: 'center', fontSize: 20}}>No History Available</Text> */}
           <Text style={{textAlign: 'center', fontSize: 20}}>Start A Run To Create A Record</Text>
           <FontAwesomeIcon icon={faStopwatch} size={70} style={{marginLeft: 160, marginTop: 50}}/>
         </View>
@@ -656,6 +668,7 @@ const Home: FC = () => {
         }, 10);
       } else {
         BackgroundTimer.stopBackgroundTimer();
+        setCSeconds(0);
       }
       return () => {
         BackgroundTimer.stopBackgroundTimer();
@@ -683,9 +696,9 @@ const Home: FC = () => {
           isRunning: false,
       });
       const newRun: Run = {
-        duration: '100',
+        duration: timeDisplay(CSeconds),
         avg_pace: '3',
-        distance: '1000',
+        distance: curr_distance.toString(),
         date: new Date().toISOString().split('T')[0],
       }
       authContext.user.runs.push(newRun);
@@ -731,7 +744,7 @@ const Home: FC = () => {
             </TouchableOpacity>
           </View>}
           {buttonInfo.stopButton && <View>
-            <TouchableOpacity onPress={()=>{stopButton(); setCSeconds(0)}} style={{backgroundColor: '#E73415', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
+            <TouchableOpacity onPress={()=>{stopButton()}} style={{backgroundColor: '#E73415', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
               <Icon name='stop-circle-outline' size={30} color="white"/>
             </TouchableOpacity>
             </View>}
@@ -1072,7 +1085,7 @@ const styles = StyleSheet.create({
   },
   listTag: {
     flex:1,
-    fontSize: 17,
+    fontSize: 15,
     paddingTop: 5,
     paddingLeft: 25,
     paddingBottom: 5,

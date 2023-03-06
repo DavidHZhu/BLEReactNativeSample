@@ -22,7 +22,7 @@ import { AuthContext } from '../components/context';
 const SignInScreen = ({navigation}) => {
 
     const [info, setInfo] = React.useState({
-        email: '',
+        username: '',
         password: '',
         secureEntry: true,
         checkInputChange: false,
@@ -34,13 +34,13 @@ const SignInScreen = ({navigation}) => {
         if(value.length != 0){
             setInfo({
                 ...info,
-                email: value,
+                username: value,
                 checkInputChange: true
             });
         } else {
             setInfo({
                 ...info,
-                email: value,
+                username: value,
                 checkInputChange: false
             });
         }
@@ -70,7 +70,7 @@ const SignInScreen = ({navigation}) => {
                 <Text style={styles.textHeader}>Welcome to OpticPace!</Text>
             </View>
             <Animatable.View style={styles.footer} animation="fadeInUpBig">
-                <Text style={styles.textFooter}>Email</Text>
+                <Text style={styles.textFooter}>User Name</Text>
                 <View style={styles.action}>
                     <FontAwesome 
                         name="user-o"
@@ -78,7 +78,7 @@ const SignInScreen = ({navigation}) => {
                         size={20}
                     />
                     <TextInput
-                        placeholder="Your Email"
+                        placeholder="Your Username"
                         style={styles.textInputField}
                         autoCapitalize="none"
                         onChangeText={(value) => {handleInputChange(value)}}
@@ -124,7 +124,7 @@ const SignInScreen = ({navigation}) => {
                 </View>
                 <View style={styles.button}>
                     <TouchableOpacity 
-                        onPress={() => {signIn(info.email, info.password)}}
+                        onPress={() => {signIn(info.username, info.password)}}
                         style={styles.signIn}
                     >
                     <LinearGradient

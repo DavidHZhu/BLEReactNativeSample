@@ -1,7 +1,6 @@
 import {Run} from './Runs';
 export type User = {
-    name: string;
-    email: string;
+    username: string;
     password: string;
     runs: Array<Run>;
   };
