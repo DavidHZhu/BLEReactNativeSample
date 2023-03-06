@@ -75,6 +75,15 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+let curr_locations: any[] = [];
+// these will be by default m/s
+let speeds: number[] = [];
+let prev_loc: SimplifiedLocation | null = null;
+let init_count = 0;
+let limit = 1;
+let curr_distance = 0;
+let total_dist = 0;
+
 const formatStopWatch = (number : number) => (number <= 9 ? `0${number}` : number);
 
 function stopWatchDisplay(cs : number) {
@@ -138,6 +147,7 @@ const Home: FC = () => {
   const [GoalDistance, setGoalDistance] = useState("");
   const [GoalPace, setGoalPace] = useState("");
   const [startDate, setStart] = useState(0);
+  const [unsubscribe, setUnsubscribe] = useState(null);
   // const [endDate, setEndDate] = useState(null);
   // const [times, setTimes] = 
   // useState<{start: Date; end: Date}>({
@@ -184,15 +194,10 @@ const Home: FC = () => {
 
   let users: User[] = [testUser];
 
-  let curr_locations: any[] = [];
-  // these will be by default m/s
-  let speeds: number[] = [];
-  let prev_loc: SimplifiedLocation | null = null;
-  let init_count = 0;
-  let limit = 1;
-  let curr_distance = 0;
-  let total_dist = 0;
-  let locationSubscription = RNLocation.subscribeToLocationUpdates(locations => locations);
+  
+  // console.log("REACHED STARTED>.>>>>>>>>>>>>>>>>>>>>.");
+  // let locationSubscription = RNLocation.subscribeToLocationUpdates(locations => locations);
+  // let locationSubscription = null;
 
   const stopButton = () => {
     setButtonInfo({
@@ -302,7 +307,9 @@ const Home: FC = () => {
     console.log("Start Session!");
 
     GpsKalman.startSession();
-    locationSubscription = RNLocation.subscribeToLocationUpdates(
+    // locationSubscription();
+    // locationSubscription
+    const unsub = RNLocation.subscribeToLocationUpdates(
       async locations => {
         // if we have a location
         // get distance => normalise?
@@ -390,6 +397,7 @@ const Home: FC = () => {
         
       }
     )
+    setUnsubscribe({"unsub": unsub});
 
   }
     
@@ -757,20 +765,25 @@ const Home: FC = () => {
     }
 
     const toggleStartPauseButton = () => {
-      setButtonInfo({
+      const currButtonState = {
           startButton: !buttonInfo.startButton,
           pauseButton: !buttonInfo.pauseButton,
           stopButton: buttonInfo.stopButton === false ? true : buttonInfo.stopButton,
           isRunning: (buttonInfo.startButton === true && buttonInfo.pauseButton === false) ? true : false
-      });
-      if (buttonInfo.isRunning && !buttonInfo.startButton) {
+      }
+      setButtonInfo(currButtonState);
+      if (currButtonState.isRunning && !currButtonState.startButton) {
         // setStartDate(new Date());
         // start = Date.now();
+        console.log("started");
+        setStart(Date.now());
         console.log(start);
       } else {
         console.log("not started")
-        setStart(Date.now());
-        console.log(start);
+        // setStart(Date.now());
+        // console.log(start);
+        unsubscribe.unsub();
+        setUnsubscribe(null);
       }
     }
 
@@ -791,7 +804,10 @@ const Home: FC = () => {
         date: new Date().toISOString().split('T')[0],
       }
       authContext.user.runs.push(newRun);
-      locationSubscription();
+      console.log("stopped here");
+      unsubscribe.unsub();
+      setUnsubscribe(null);
+      // locationSubscription();
       setTotalDistance(0);
       setCurrSpeed(0);
       setAverageSpeed(0);
@@ -911,7 +927,7 @@ const Home: FC = () => {
             </TouchableOpacity>
           </View>}
           {buttonInfo.pauseButton && <View>
-            <TouchableOpacity onPress={()=>{toggleStartPauseButton(); locationSubscription();}} style={{backgroundColor: '#67AE33', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
+            <TouchableOpacity onPress={()=>{toggleStartPauseButton();}} style={{backgroundColor: '#67AE33', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
               <Icon name='pause-circle-outline' size={30} color="white"/>
             </TouchableOpacity>
           </View>}
