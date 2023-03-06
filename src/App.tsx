@@ -699,6 +699,48 @@ const Home: FC = () => {
       });
     }
 
+    const showDistance = (distance:number) => {
+      if(distanceSelected === "feet"){
+        return (distance*3.28084).toFixed(2);
+      }
+      else if (distanceSelected === "km"){
+        return (distance/1000).toFixed(2);
+      }
+      else if (distanceSelected === "miles"){
+        return (distance/1609).toFixed(2);
+      } else {
+        return distance;
+      }
+    }
+
+    const showAvgPace = (pace:number) => {
+      if(avgPaceSelected === "feet/s"){
+        return (pace*3.28084).toFixed(2);
+      }
+      else if (avgPaceSelected === "km/hr"){
+        return (pace*3.6).toFixed(2);
+      }
+      else if (avgPaceSelected === "miles/hr"){
+        return (pace*2.237).toFixed(2);
+      } else {
+        return pace;
+      }
+    }
+
+    const showCurrentPace = (pace:number) => {
+      if(currentPaceSelected === "feet/s"){
+        return (pace*3.28084).toFixed(2);
+      }
+      else if (currentPaceSelected === "km/hr"){
+        return (pace*3.6).toFixed(2);
+      }
+      else if (currentPaceSelected === "miles/hr"){
+        return (pace*2.237).toFixed(2);
+      } else {
+        return pace;
+      }
+    }
+
     return (
       <SafeAreaView style={styles.container}>
         <View style={{alignItems: 'center', marginTop: 15}}>
@@ -712,7 +754,7 @@ const Home: FC = () => {
           {(isAveragePace || isCurrentPace) && <View style={{marginLeft: 15, marginRight: 15, borderBottomWidth: 2, borderBottomColor: '#F08080', flexDirection: 'row', alignContent: 'center', alignItems: 'center', justifyContent: 'space-evenly'}}>
             {isCurrentPace && <View>
               <Text style={{textAlign: 'center', fontSize: 25, marginBottom: 5, marginTop: 15, color: '#E9967A'}}>Current Pace</Text>
-              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 5}}>{speed}</Text>
+              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 5}}>{showCurrentPace(speed)}</Text>
               <View style={{paddingLeft: 25, paddingBottom: 10}}>
                 <SelectList data={paceData} setSelected={(val:string)=>isCurrentPaceSeleted(val)} save="value" defaultOption={{key:1, value:"m/s"}} boxStyles={{width: 100}}/>
               </View>
@@ -720,7 +762,7 @@ const Home: FC = () => {
             {isCurrentPace && isAveragePace && <View style={{height: '80%', width: 1.5, backgroundColor: '#F08080'}}></View>}
             {isAveragePace && <View>
               <Text style={{textAlign: 'center', fontSize: 25, marginBottom: 5, marginTop: 15, color: '#E9967A'}}>Average Pace</Text>
-              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 5}}>{average_speed}</Text>
+              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 5}}>{showAvgPace(average_speed)}</Text>
               <View style={{paddingLeft: 25, paddingBottom: 10}}>
                 <SelectList data={paceData} setSelected={(val:string)=>isAvgPaceSeleted(val)} save="value" defaultOption={{key:1, value:"m/s"}} boxStyles={{width: 100}}/>
               </View>
@@ -729,7 +771,7 @@ const Home: FC = () => {
           {isKilometers && <View style={{marginTop: 5, marginBottom: 5, marginLeft: 15, marginRight: 15, borderBottomWidth: 2, borderBottomColor: '#F08080'}}>
           <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 5, color: '#E9967A'}}>Distance</Text>
             <View style={{flexDirection: 'row'}}>
-              <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 10, paddingLeft: 146}}>{total_distance}</Text>
+              <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 10, paddingLeft: 146}}>{showDistance(total_distance)}</Text>
               <View style={{paddingLeft: 25, paddingBottom: 10}}>
                 <SelectList data={distanceData} setSelected={(val:string)=>isDistanceSeleted(val)} save="value" defaultOption={{key:1, value:"m"}} boxStyles={{width: 83}}/>
               </View>
