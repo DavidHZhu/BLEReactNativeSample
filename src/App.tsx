@@ -18,6 +18,7 @@ import DeviceModal from './components/DeviceConnectionModal';
 import {BluetoothPeripheral} from './models/BluetoothPeripheral';
 import {StepCountResponse} from './models/StepCountResponse';
 import {User} from './models/Users';
+import {Run} from './models/Runs';
 import {
   initiateConnection,
   scanForPeripherals,
@@ -118,12 +119,35 @@ const Home: FC = () => {
     avg_acceleration: 0.0
   };
 
+  
+  let testData: Run[] = [
+    {
+      duration: "21:21",
+      avg_pace: "6",
+      distance: "3020",
+      date: "2023-03-02",
+    },
+    {
+      duration: "10:05",
+      avg_pace: "3",
+      distance: "1900",
+      date: "2023-03-03",
+    },
+    {
+      duration: "11:41",
+      avg_pace: "4",
+      distance: "2000",
+      date: "2023-03-04",
+    },
+  ];
+
   let testUser: User = {
     name: "Guest",
     email: "admin",
     password: "pass",
-    runs: [],
+    runs: testData,
   };
+
   let users: User[] = [testUser];
 
   let curr_locations: any[] = [];
@@ -139,12 +163,21 @@ const Home: FC = () => {
   };
 
   const authContext = React.useMemo(() => ({
-    signIn: (email: String, password: String) => {
-      console.log("given", email, password);
-      console.log(users);
-      console.log(users.find(user => user.email == email && user.password == password));
+    userName: '',
+    userEmail: '',
+    user: {
+      name: 'name',
+      email: 'email',
+      password: 'password',
+      runs: [],
+    } as User,
+    signIn: (email: string, password: string) => {
       if (users.find(user => user.email == email && user.password == password)) {
+        authContext.user = users.find(user => user.email == email)!;
+        let userName = users.find(user => user.email == email)!.name
         setAuthToken(1);
+        authContext.userEmail = email;
+        authContext.userName = userName;
       } else {
         console.log("incorrect login");
       }
@@ -152,11 +185,23 @@ const Home: FC = () => {
     signOut: () => {
       setAuthToken(null);
     },
-    signUp: () => {
-      setAuthToken(1);
+    signUp: (name: string, email: string, password: string) => {
+      if (users.find(user => user.email == email)) {
+        console.log("email already in use");
+      } else {
+        const newUser: User = {
+          name: name,
+          email: email,
+          password: password,
+          runs: [],
+        }
+        authContext.user = newUser;
+        authContext.userEmail = email;
+        authContext.userName = name;
+        users.push(newUser);
+        setAuthToken(1);
+      }
     },
-    userName: 'name',
-    userEmail: 'email',
   }), []);
 
   const toggleDuration = () => {
@@ -513,11 +558,13 @@ const Home: FC = () => {
       {tag: '2023-03-02', duration: "18:00", distance: 3000, pace: 6},
       {tag: '2023-03-02', duration: "18:00", distance: 3000, pace: 6},
     ];
+
+    let runData = authContext.user.runs;
     
     return (
       <SafeAreaView style={styles.container}>
       <View>
-      {(historyData && historyData.length>0) ?
+      {(runData && runData.length>0) ?
         <View style={{paddingTop: 5}}>
           <View style={styles.listWrap}>
             <View style={{flexDirection: 'row'}}>
@@ -538,14 +585,14 @@ const Home: FC = () => {
             </View>
           </View>
           <FlatList
-            data={historyData}
+            data={runData}
             renderItem={
               ({item}) => 
                 <View style={styles.listWrap}>
                   <Text style={{paddingLeft: 25, paddingRight: 37, paddingTop: 5, paddingBottom: 5, flex:0.5, fontSize: 16, fontFamily: 'monospace', backgroundColor: 'pink'}}>{item.duration}</Text>
-                  <Text style={{paddingLeft: 23, paddingTop: 5, paddingBottom: 5, flex:0.35, fontSize: 16, fontFamily: 'monospace', backgroundColor: 'pink'}}>{item.pace}</Text>
+                  <Text style={{paddingLeft: 23, paddingTop: 5, paddingBottom: 5, flex:0.35, fontSize: 16, fontFamily: 'monospace', backgroundColor: 'pink'}}>{item.avg_pace}</Text>
                   <Text style={{paddingLeft: 37, paddingTop: 5, paddingBottom: 5, flex:0.5, fontSize: 16, fontFamily: 'monospace', backgroundColor: 'pink'}}>{item.distance}</Text>
-                  <Text style={styles.listTag}>{item.tag}</Text>
+                  <Text style={styles.listTag}>{item.date}</Text>
                 </View>
             }
           />
@@ -635,6 +682,13 @@ const Home: FC = () => {
           stopButton: false,
           isRunning: false,
       });
+      const newRun: Run = {
+        duration: '100',
+        avg_pace: '3',
+        distance: '1000',
+        date: new Date().toISOString().split('T')[0],
+      }
+      authContext.user.runs.push(newRun);
     }
 
     return (
