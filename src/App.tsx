@@ -135,7 +135,9 @@ const Home: FC = () => {
   const [speed, setCurrSpeed] = useState(0);
   const [average_speed, setAverageSpeed] = useState(0);
   // const [CSeconds, setCSeconds] = useState(0);
-  const [startDate, setStartDate] = useState(null);
+  const [GoalDistance, setGoalDistance] = useState("");
+  const [GoalPace, setGoalPace] = useState("");
+  const [startDate, setStart] = useState(0);
   // const [endDate, setEndDate] = useState(null);
   // const [times, setTimes] = 
   // useState<{start: Date; end: Date}>({
@@ -331,14 +333,18 @@ const Home: FC = () => {
               if (init_count >= limit) {
                 if (prev_loc == null) {
                   prev_loc = {
-                    lat: filteredLoc.latitude,
-                    lon: filteredLoc.longitude,
+                    // lat: filteredLoc.latitude,
+                    // lon: filteredLoc.longitude,
+                    lat: firstLoc.latitude,
+                    lon: firstLoc.longitude,
                     timestamp: locations[0].timestamp,
                   }
                 } else {
                   const curr_loc = {
-                    lat: filteredLoc.latitude,
-                    lon: filteredLoc.longitude,
+                    // lat: filteredLoc.latitude,
+                    // lon: filteredLoc.longitude,
+                    lat: firstLoc.latitude,
+                    lon: firstLoc.longitude,
                     timestamp: locations[0].timestamp,
                   };
                   const location_pair = [prev_loc, curr_loc];
@@ -354,7 +360,8 @@ const Home: FC = () => {
                   total_dist = total_dist + pair_distance;
                   setTotalDistance(total_dist);
                 }
-                curr_locations.push(filteredLoc);
+                // curr_locations.push(filteredLoc);
+                curr_locations.push(firstLoc);
                 // const new_locations = [...curr_locations, filteredLoc];
                 console.log("filtered Location:", filteredLoc.latitude, filteredLoc.longitude);
                 console.log("Total Distance:" + geolib.getPathLength(curr_locations));
@@ -703,19 +710,19 @@ const Home: FC = () => {
   }
 
   function HomeScreen() {
-    const [start, setStart] = useState(0);
+    // const [start, setStart] = useState(0);
     const [CSeconds, setCSeconds] = useState(0);
     const [currentPaceSelected, isCurrentPaceSeleted] = useState("");
     const [avgPaceSelected, isAvgPaceSeleted] = useState("");
     const [distanceSelected, isDistanceSeleted] = useState("");
-    const [GoalDistance, setGoalDistance] = useState("");
-    const [GoalPace, setGoalPace] = useState("");
-    const [buttonInfo, setButtonInfo] = React.useState({
-      startButton: true,
-      pauseButton: false,
-      stopButton: false,
-      isRunning: false,
-    });
+    // const [GoalDistance, setGoalDistance] = useState("");
+    // const [GoalPace, setGoalPace] = useState("");
+    // const [buttonInfo, setButtonInfo] = React.useState({
+    //   startButton: true,
+    //   pauseButton: false,
+    //   stopButton: false,
+    //   isRunning: false,
+    // });
 
     const paceData = [
       {key:1, value:"m/s"},
@@ -731,19 +738,19 @@ const Home: FC = () => {
       {key:4, value:"miles"},
     ];
 
-    useEffect(() => {
-      if (buttonInfo.isRunning === true){
-        BackgroundTimer.runBackgroundTimer(() => {
-          setCSeconds((prev)=>{ return prev+1 });
-        }, 10);
-      } else {
-        BackgroundTimer.stopBackgroundTimer();
-        setCSeconds(0);
-      }
-      return () => {
-        BackgroundTimer.stopBackgroundTimer();
-      };
-    }, [buttonInfo.isRunning]);
+    // useEffect(() => {
+    //   if (buttonInfo.isRunning === true){
+    //     BackgroundTimer.runBackgroundTimer(() => {
+    //       setCSeconds((prev)=>{ return prev+1 });
+    //     }, 10);
+    //   } else {
+    //     BackgroundTimer.stopBackgroundTimer();
+    //     setCSeconds(0);
+    //   }
+    //   return () => {
+    //     BackgroundTimer.stopBackgroundTimer();
+    //   };
+    // }, [buttonInfo.isRunning]);
   
     const displayWatch = () => {
       return stopWatchDisplay(CSeconds)
@@ -775,15 +782,27 @@ const Home: FC = () => {
           isRunning: false,
       });
       console.log("start", start, "end", Date.now());
-      const duration = Date.now()-start;
+      const duration = Date.now()-startDate;
       console.log(duration + ' ms');
       const newRun: Run = {
         duration: timeDisplay(Math.floor(duration / 10)),
-        avg_pace: '3',
-        distance: curr_distance.toString(),
+        avg_pace: average_speed.toString(),
+        distance: total_distance.toString(),
         date: new Date().toISOString().split('T')[0],
       }
       authContext.user.runs.push(newRun);
+      locationSubscription();
+      setTotalDistance(0);
+      setCurrSpeed(0);
+      setAverageSpeed(0);
+
+      curr_locations = [];
+      // these will be by default m/s
+      speeds = [];
+      prev_loc = null;
+      init_count = 0;
+      curr_distance = 0;
+      total_dist = 0;
     }
 
     const showDistance = (distance:number) => {
