@@ -46,6 +46,7 @@ import GpsKalman from 'react-native-gps-kalman';
 import { AuthContext } from './components/context';
 import BackgroundTimer from 'react-native-background-timer';
 import { SelectList } from 'react-native-dropdown-select-list';
+import AntDesignIcon from 'react-native-vector-icons/AntDesign';
 
 RNLocation.configure({
   desiredAccuracy: {
@@ -640,6 +641,8 @@ const Home: FC = () => {
     const [currentPaceSelected, isCurrentPaceSeleted] = useState("");
     const [avgPaceSelected, isAvgPaceSeleted] = useState("");
     const [distanceSelected, isDistanceSeleted] = useState("");
+    const [GoalDistance, setGoalDistance] = useState("");
+    const [GoalPace, setGoalPace] = useState("");
     const [buttonInfo, setButtonInfo] = React.useState({
       startButton: true,
       pauseButton: false,
@@ -723,7 +726,7 @@ const Home: FC = () => {
               </View>
             </View>}
           </View>}
-          {isKilometers && <View style={{marginTop: 15, marginBottom: 5, marginLeft: 15, marginRight: 15, borderBottomWidth: 2, borderBottomColor: '#F08080'}}>
+          {isKilometers && <View style={{marginTop: 5, marginBottom: 5, marginLeft: 15, marginRight: 15, borderBottomWidth: 2, borderBottomColor: '#F08080'}}>
           <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 5, color: '#E9967A'}}>Distance</Text>
             <View style={{flexDirection: 'row'}}>
               <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 10, paddingLeft: 146}}>{total_distance}</Text>
@@ -732,6 +735,26 @@ const Home: FC = () => {
               </View>
             </View>
           </View>}
+        </View>
+        <View style={{flexDirection: 'row', marginTop: 20}}>
+          <View style={{paddingLeft: 25, flexDirection: 'row'}}>
+            <TextInput onChangeText={setGoalPace} value={GoalPace} placeholder='set a pace' keyboardType='numeric' style={{textAlign:'center', width:100, borderWidth:1, height:40, borderRadius: 30}}/>
+            <Text style={{paddingLeft: 2, paddingTop: 10}}>km/min</Text>
+          </View>
+          <View>
+            <View style={{paddingLeft: 20, flexDirection: 'row'}}>
+              <TextInput onChangeText={setGoalDistance} value={GoalDistance} placeholder='set a distance' keyboardType='numeric' style={{textAlign:'center', width:100, borderWidth:1, height:40, borderRadius: 30}}/>
+              <Text style={{paddingLeft: 2, paddingTop: 10}}>km</Text>
+            </View>
+          </View>
+          {(GoalDistance !== "" && GoalPace !== "") &&
+            <View style={{paddingLeft: 20, paddingTop: 5}}>
+              {(Number(GoalDistance) >= (total_distance/1000) && Number(GoalPace) >= (average_speed/1000*60))
+              ? <AntDesignIcon name="checkcircle" size={30} color="green"/>
+              : <AntDesignIcon name="closecircle" size={30} color="red"/>
+              }
+            </View>
+          }
         </View>
         <View style={{flexDirection: 'row', alignContent: 'center', alignItems: 'center', justifyContent: 'space-evenly', marginTop: 20}}>
           {buttonInfo.startButton && <View>
@@ -949,21 +972,7 @@ const Home: FC = () => {
   const [myHeight, setMyHeight] = useState('');
   return (
     <AuthContext.Provider value={authContext}>
-      <NavigationContainer>
-      <SettingsDrawer.Navigator initialRouteName='Home' drawerContent={ props => <DrawerPage {...props}
-            showAveragePace={isAveragePace}
-            showCurrentPace={isCurrentPace}
-            showDuration={isDuration}
-            showKilometers={isKilometers}
-            toggleShowAveragePace={toggleAveragePace}
-            toggleShowCurrentPace={toggleCurrentPace}
-            toggleShowDuration={toggleDuration}
-            toggleShowKilometers={toggleKilometers}
-          />}>
-            <SettingsDrawer.Screen name="Home" component={TabScreen} options={{headerShown: false, headerTitle: 'Home'}}/>
-      </SettingsDrawer.Navigator>
-      </NavigationContainer>
-     {/* <NavigationContainer>
+     <NavigationContainer>
         {authToken !== null ?
           <SettingsDrawer.Navigator initialRouteName='Home' drawerContent={ props => <DrawerPage {...props}
             showAveragePace={isAveragePace}
@@ -978,7 +987,7 @@ const Home: FC = () => {
             <SettingsDrawer.Screen name="Home" component={TabScreen} options={{headerShown: false, headerTitle: 'Home'}}/>
           </SettingsDrawer.Navigator>
         : <AuthStackScreen/>}
-        </NavigationContainer>*/}
+      </NavigationContainer>
     </AuthContext.Provider>
     /*<SafeAreaView style={styles.container}>
       {isConnected && (
