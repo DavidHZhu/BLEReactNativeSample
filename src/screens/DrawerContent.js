@@ -107,7 +107,7 @@ export function DrawerPage(props){
                         <TouchableRipple onPress={() => {toggleTheme()}}>
                             <View style={styles.bluetoothPreference}>
                                 <View pointerEvents="none">
-                                    <Switch value={connectBluetooth}/>
+                                    <Switch value={deviceUnits}/>
                                 </View>
                             </View>
                         </TouchableRipple>
