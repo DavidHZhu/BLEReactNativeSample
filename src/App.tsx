@@ -8,7 +8,7 @@
  * @format
  */
 import 'react-native-gesture-handler';
-import React, {FC, useState} from 'react';
+import React, {FC, useEffect, useState} from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import {SafeAreaView, StyleSheet, Text, View, TextInput, TouchableOpacity, FlatList} from 'react-native';
@@ -45,6 +45,7 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { DrawerPage} from './screens/DrawerContent';
 import AuthStackScreen from './screens/AuthenticationStack';
 import { AuthContext } from './components/context';
+import BackgroundTimer from 'react-native-background-timer';
 
 // RNLocation.configure({
 //  distanceFilter: null
@@ -63,6 +64,27 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+const formatStopWatch = (number : number) => (number <= 9 ? `0${number}` : number);
+
+function stopWatchDisplay(cs : number) {
+  if (cs < 0) {
+    return '00:00:00';
+  }
+  if (cs < 100) {
+    return `00:00:${formatStopWatch(cs)}`
+  } else {
+    let centiSeconds = cs%100;
+    let seconds = (cs-centiSeconds)/100;
+    if(seconds < 60){
+      return `00:${formatStopWatch(seconds)}:${formatStopWatch(centiSeconds)}`;
+    } else {
+      let minutes = (seconds - seconds%60)/60;
+      seconds = seconds%60;
+      return `${formatStopWatch(minutes)}:${formatStopWatch(seconds)}:${formatStopWatch(centiSeconds)}`;
+    }
+  }
+}
+
 const Home: FC = () => {
   const dispatch = useDispatch();
   const [count, setCount] = useState(0);
@@ -73,11 +95,6 @@ const Home: FC = () => {
   const [isCurrentPace, setIsCurrentPace] = useState(true);
   const [isAveragePace, setIsAveragePace] = useState(true);
   const [isKilometers, setIsKilometers] = useState(true);
-  const [buttonInfo, setButtonInfo] = React.useState({
-    startButton: true,
-    pauseButton: false,
-    stopButton: false,
-});
 
   const authContext = React.useMemo(() => ({
     signIn: () => {
@@ -93,20 +110,6 @@ const Home: FC = () => {
     userEmail: 'email',
   }), []);
 
-  const toggleStartPauseButton = () => {
-    setButtonInfo({
-      startButton: !buttonInfo.startButton,
-      pauseButton: !buttonInfo.pauseButton,
-      stopButton: buttonInfo.stopButton === false ? true : buttonInfo.stopButton
-    });
-  }
-  const stopButton = () => {
-    setButtonInfo({
-      startButton: true,
-      pauseButton: false,
-      stopButton: false,
-    });
-  }
   const toggleDuration = () => {
     setIsDuration(!isDuration);
 
@@ -288,6 +291,50 @@ const Home: FC = () => {
   }
 
   function HomeScreen() {
+
+    const [CSeconds, setCSeconds] = useState(0);
+    const [buttonInfo, setButtonInfo] = React.useState({
+      startButton: true,
+      pauseButton: false,
+      stopButton: false,
+      isRunning: false,
+    });
+
+    useEffect(() => {
+      if (buttonInfo.isRunning === true){
+        BackgroundTimer.runBackgroundTimer(() => {
+          setCSeconds((prev)=>{ return prev+1 });
+        }, 10);
+      } else {
+        BackgroundTimer.stopBackgroundTimer();
+      }
+      return () => {
+        BackgroundTimer.stopBackgroundTimer();
+      };
+    }, [buttonInfo.isRunning]);
+  
+    const displayWatch = () => {
+      return stopWatchDisplay(CSeconds)
+    }
+
+    const toggleStartPauseButton = () => {
+      setButtonInfo({
+          startButton: !buttonInfo.startButton,
+          pauseButton: !buttonInfo.pauseButton,
+          stopButton: buttonInfo.stopButton === false ? true : buttonInfo.stopButton,
+          isRunning: (buttonInfo.startButton === true && buttonInfo.pauseButton === false) ? true : false
+      });
+    }
+
+    const stopButton = () => {
+      setButtonInfo({
+          startButton: true,
+          pauseButton: false,
+          stopButton: false,
+          isRunning: false,
+      });
+    }
+
     return (
       <SafeAreaView style={styles.container}>
         <View style={{alignItems: 'center', marginTop: 15}}>
@@ -296,7 +343,7 @@ const Home: FC = () => {
         <View style={{flexDirection: 'column'}}>
           {isDuration && <View style={{marginTop: 10, marginLeft: 15, marginRight: 15, borderWidth: 2, borderRadius: 10, borderColor: '#F08080'}}>
             <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 5, color: '#E9967A'}}>Duration</Text>
-            <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 10}}>00:00</Text>
+            <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 10}}>{displayWatch()}</Text>
           </View>}
           {(isAveragePace || isCurrentPace) && <View style={{marginLeft: 15, marginRight: 15, borderBottomWidth: 2, borderBottomColor: '#F08080', flexDirection: 'row', alignContent: 'center', alignItems: 'center', justifyContent: 'space-evenly'}}>
             {isCurrentPace && <View>
@@ -328,7 +375,7 @@ const Home: FC = () => {
             </TouchableOpacity>
           </View>}
           {buttonInfo.stopButton && <View>
-            <TouchableOpacity onPress={()=>{stopButton()}} style={{backgroundColor: '#E73415', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
+            <TouchableOpacity onPress={()=>{stopButton(); setCSeconds(0)}} style={{backgroundColor: '#E73415', borderRadius: 20, paddingVertical: 5, paddingHorizontal: 25}}>
               <Icon name='stop-circle-outline' size={30} color="white"/>
             </TouchableOpacity>
             </View>}
