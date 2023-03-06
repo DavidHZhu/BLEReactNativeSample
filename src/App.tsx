@@ -45,6 +45,7 @@ import AuthStackScreen from './screens/AuthenticationStack';
 import GpsKalman from 'react-native-gps-kalman';
 import { AuthContext } from './components/context';
 import BackgroundTimer from 'react-native-background-timer';
+import { SelectList } from 'react-native-dropdown-select-list';
 
 RNLocation.configure({
   desiredAccuracy: {
@@ -636,13 +637,29 @@ const Home: FC = () => {
 
   function HomeScreen() {
     const [CSeconds, setCSeconds] = useState(0);
-
+    const [currentPaceSelected, isCurrentPaceSeleted] = useState("");
+    const [avgPaceSelected, isAvgPaceSeleted] = useState("");
+    const [distanceSelected, isDistanceSeleted] = useState("");
     const [buttonInfo, setButtonInfo] = React.useState({
       startButton: true,
       pauseButton: false,
       stopButton: false,
       isRunning: false,
     });
+
+    const paceData = [
+      {key:1, value:"m/s"},
+      {key:2, value:"feet/s"},
+      {key:3, value:"km/hr"},
+      {key:4, value:"miles/hr"},
+    ];
+
+    const distanceData = [
+      {key:1, value:"m"},
+      {key:2, value:"feet"},
+      {key:3, value:"km"},
+      {key:4, value:"miles"},
+    ];
 
     useEffect(() => {
       if (buttonInfo.isRunning === true){
@@ -686,25 +703,34 @@ const Home: FC = () => {
         </View>
         <View style={{flexDirection: 'column'}}>
           {isDuration && <View style={{marginTop: 10, marginLeft: 15, marginRight: 15, borderWidth: 2, borderRadius: 10, borderColor: '#F08080'}}>
-            <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 5, color: '#E9967A'}}>Duration</Text>
-            <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 10}}>{displayWatch()}</Text>
+            <Text style={{textAlign: 'center', fontSize: 35, color: '#E9967A'}}>Duration</Text>
+            <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 5}}>{displayWatch()}</Text>
           </View>}
           {(isAveragePace || isCurrentPace) && <View style={{marginLeft: 15, marginRight: 15, borderBottomWidth: 2, borderBottomColor: '#F08080', flexDirection: 'row', alignContent: 'center', alignItems: 'center', justifyContent: 'space-evenly'}}>
             {isCurrentPace && <View>
-              <Text style={{textAlign: 'center', fontSize: 25, marginBottom: 15, marginTop: 15, color: '#E9967A'}}>Current Pace</Text>
-              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 10}}>{speed}</Text>
-              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 20}}>m/s</Text>
+              <Text style={{textAlign: 'center', fontSize: 25, marginBottom: 5, marginTop: 15, color: '#E9967A'}}>Current Pace</Text>
+              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 5}}>{speed}</Text>
+              <View style={{paddingLeft: 25, paddingBottom: 10}}>
+                <SelectList data={paceData} setSelected={(val:string)=>isCurrentPaceSeleted(val)} save="value" defaultOption={{key:1, value:"m/s"}} boxStyles={{width: 100}}/>
+              </View>
             </View>}
             {isCurrentPace && isAveragePace && <View style={{height: '80%', width: 1.5, backgroundColor: '#F08080'}}></View>}
             {isAveragePace && <View>
-              <Text style={{textAlign: 'center', fontSize: 25, marginBottom: 15, marginTop: 15, color: '#E9967A'}}>Average Pace</Text>
-              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 10}}>{average_speed}</Text>
-              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 20}}>m/s</Text>
+              <Text style={{textAlign: 'center', fontSize: 25, marginBottom: 5, marginTop: 15, color: '#E9967A'}}>Average Pace</Text>
+              <Text style={{textAlign: 'center', fontSize: 30, marginBottom: 5}}>{average_speed}</Text>
+              <View style={{paddingLeft: 25, paddingBottom: 10}}>
+                <SelectList data={paceData} setSelected={(val:string)=>isAvgPaceSeleted(val)} save="value" defaultOption={{key:1, value:"m/s"}} boxStyles={{width: 100}}/>
+              </View>
             </View>}
           </View>}
-          {isKilometers && <View style={{marginTop: 15, marginBottom: 15, marginLeft: 15, marginRight: 15, borderBottomWidth: 2, borderBottomColor: '#F08080'}}>
-            <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 5, color: '#E9967A'}}>Distance</Text>
-            <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 10}}>{total_distance} m </Text>
+          {isKilometers && <View style={{marginTop: 15, marginBottom: 5, marginLeft: 15, marginRight: 15, borderBottomWidth: 2, borderBottomColor: '#F08080'}}>
+          <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 5, color: '#E9967A'}}>Distance</Text>
+            <View style={{flexDirection: 'row'}}>
+              <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 10, paddingLeft: 146}}>{total_distance}</Text>
+              <View style={{paddingLeft: 25, paddingBottom: 10}}>
+                <SelectList data={distanceData} setSelected={(val:string)=>isDistanceSeleted(val)} save="value" defaultOption={{key:1, value:"m"}} boxStyles={{width: 83}}/>
+              </View>
+            </View>
           </View>}
         </View>
         <View style={{flexDirection: 'row', alignContent: 'center', alignItems: 'center', justifyContent: 'space-evenly', marginTop: 20}}>
@@ -924,6 +950,20 @@ const Home: FC = () => {
   return (
     <AuthContext.Provider value={authContext}>
       <NavigationContainer>
+      <SettingsDrawer.Navigator initialRouteName='Home' drawerContent={ props => <DrawerPage {...props}
+            showAveragePace={isAveragePace}
+            showCurrentPace={isCurrentPace}
+            showDuration={isDuration}
+            showKilometers={isKilometers}
+            toggleShowAveragePace={toggleAveragePace}
+            toggleShowCurrentPace={toggleCurrentPace}
+            toggleShowDuration={toggleDuration}
+            toggleShowKilometers={toggleKilometers}
+          />}>
+            <SettingsDrawer.Screen name="Home" component={TabScreen} options={{headerShown: false, headerTitle: 'Home'}}/>
+      </SettingsDrawer.Navigator>
+      </NavigationContainer>
+     {/* <NavigationContainer>
         {authToken !== null ?
           <SettingsDrawer.Navigator initialRouteName='Home' drawerContent={ props => <DrawerPage {...props}
             showAveragePace={isAveragePace}
@@ -938,7 +978,7 @@ const Home: FC = () => {
             <SettingsDrawer.Screen name="Home" component={TabScreen} options={{headerShown: false, headerTitle: 'Home'}}/>
           </SettingsDrawer.Navigator>
         : <AuthStackScreen/>}
-      </NavigationContainer>
+        </NavigationContainer>*/}
     </AuthContext.Provider>
     /*<SafeAreaView style={styles.container}>
       {isConnected && (
