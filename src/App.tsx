@@ -42,12 +42,21 @@ import {createDrawerNavigator} from '@react-navigation/drawer';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import {DrawerPage} from './screens/DrawerContent';
 import AuthStackScreen from './screens/AuthenticationStack';
+import GpsKalman from 'react-native-gps-kalman';
 
-// RNLocation.configure({
-//  distanceFilter: null
-// });
+RNLocation.configure({
+  desiredAccuracy: {
+    ios: "best",
+    android: "balancedPowerAccuracy"
+  },
+  interval: 1000
+});
 var Buffer = require('buffer/').Buffer;
 var geolib = require('geolib');
+var {KalmanFilter} = require('kalman-filter');
+const kFilter = new KalmanFilter({
+  observation: 2,
+});
 const App: FC = () => {
   return (
     <Provider store={store}>
@@ -75,6 +84,19 @@ const Home: FC = () => {
     pauseButton: false,
     stopButton: false,
   });
+  const [curr_distance, setCurrDistance] = useState(0);
+  
+  const [locationSubscription, setLocationSubscription] = useState(RNLocation.subscribeToLocationUpdates(locations => locations));
+
+  let start: StepCountResponse | undefined = {
+    session_code: 0,
+    step_count: 0,
+    avg_acceleration: 0.0
+  };
+
+  let curr_locations: any[] = [];
+  let init_count = 0;
+  let limit = 15;
 
   const toggleStartPauseButton = () => {
     setButtonInfo({
@@ -126,6 +148,90 @@ const Home: FC = () => {
   const connectToPeripheral = (device: BluetoothPeripheral) =>
     dispatch(initiateConnection(device.id));
 
+  const getGPSLocation = async () => {
+    let permission = await RNLocation.checkPermission({
+      ios: 'whenInUse', // or 'always'
+      android: {
+        detail: 'coarse', // or 'fine'
+      },
+    });
+    if (!permission) {
+      permission = await RNLocation.requestPermission({
+        ios: 'whenInUse',
+        android: {
+          detail: 'coarse',
+          rationale: {
+            title: 'We need to access your location',
+            message: 'We use your location to show where you are on the map',
+            buttonPositive: 'OK',
+            buttonNegative: 'Cancel',
+          },
+        },
+      });
+      console.log(permission);
+    }
+
+    start = await bluetoothLeManager.getBLEStepLog();
+
+    console.log("Start Session!");
+
+    GpsKalman.startSession();
+    let x = RNLocation.subscribeToLocationUpdates(
+      async locations => {
+        // if we have a location
+        // get distance => normalise?
+        console.log("New Locations....:", locations[0].latitude, locations[0].longitude);
+        if (start == undefined) {
+          console.log("start undefined....");
+          // refetch start 
+          const new_start = await bluetoothLeManager.getBLEStepLog();
+
+          init_count = 0;
+          start = new_start;
+        } else {
+          // get end steps
+          const end = await bluetoothLeManager.getBLEStepLog();
+          if (end == undefined || start != undefined && start.session_code != end.session_code) {
+            // session codes are different => different sessions, a reset happened inbetween
+            console.log("end undefined....", end, start);
+            start = end;
+          } else {
+            console.log("New Location:", locations[0]);
+            console.log("start step: " + start.step_count);
+            console.log("end step: " + end.step_count);
+            if (curr_distance < 200) {
+              const firstLoc = locations[0];
+              const filteredLoc = await GpsKalman.process(firstLoc.latitude, firstLoc.longitude, firstLoc.altitude, firstLoc.timestamp);
+              if (init_count >= limit) {
+                curr_locations.push(filteredLoc);
+                // const new_locations = [...curr_locations, filteredLoc];
+                console.log("filtered Location:", filteredLoc.latitude, filteredLoc.longitude);
+                console.log("Total Distance:" + geolib.getPathLength(curr_locations));
+                setCurrDistance(geolib.getPathLength(curr_locations));
+                // setCurrLocations(new_locations);
+              } else {
+                init_count += 1;
+              }
+            } else {
+              // curr_distance is greater => send the distance
+              console.log("Sending distance");
+              const total_steps = end.step_count - start.step_count;
+              const dispstep = total_steps != 0 ? curr_distance / total_steps : 0.0;
+              bluetoothLeManager.sendBLEWriteDistancePerStep(dispstep);
+              GpsKalman.startSession();
+              init_count = 0;
+              setCurrDistance(0);
+              curr_locations = [];
+              start = end;
+            }
+          }
+        }
+        
+      }
+    )
+
+  }
+    
   const getLocation = async () => {
     let permission = await RNLocation.checkPermission({
       ios: 'whenInUse', // or 'always'
@@ -178,46 +284,91 @@ const Home: FC = () => {
       // store gps coords and then at the end of this time window, compute the distance and send, rinse and repeat
       
       while (true) {
-        const curr_gps_data = [];
         const start = await bluetoothLeManager.getBLEStepLog();
         if (start == undefined) {
           // break? here, we have to stop though,
           continue;
         }
         console.log("Start steps:" + start.step_count);
-
         console.log('Starting poll....');
-        for (let i = 0; i < 20; i++) {
-          const curr_location = await RNLocation.getLatestLocation({
-            timeout: 100,
-          });
-          if (curr_location != null) {
-            console.log(
-              `Lat: ${curr_location.latitude}, Lon: ${curr_location.latitude}, Accuracy: ${curr_location.accuracy}, Timestamp: ${curr_location.timestamp}`,
-            );
-            curr_gps_data.push(curr_location);
-          }
-          await sleep(1000);
+        GpsKalman.startSession();
+        let distance_travelled = 0;
+        setCurrDistance(distance_travelled);
+        // prev, next => calculate distance then =>
+        let end = undefined;
+        let isNewSession = false;
+        const curr_gps_data = [];
+        while(distance_travelled < 200) {
+          // pool 20 coords
+          console.log("get location");
+          await RNLocation.getLatestLocation({timeout: 1000}).then(
+            location => {
+              console.log(location);
+            }
+          )
+          // for (let i = 0; i < 20; i++) {
+          //   const curr_location = await RNLocation.getLatestLocation({
+          //     timeout: 100,
+          //   });
+          //   if (curr_location != null) {
+          //     // console.log(
+          //     //   `Lat: ${curr_location.latitude}, Lon: ${curr_location.longitude}, Accuracy: ${curr_location.accuracy}, Timestamp: ${curr_location.timestamp}`,
+          //     // );
+          //     const filteredLoc = await GpsKalman.process(curr_location.latitude, curr_location.longitude, curr_location.altitude, curr_location.timestamp);
+          //     // console.log(
+          //     //   `Lat: ${curr_location.latitude}, Lon: ${curr_location.longitude}`,
+          //     // );
+          //     console.log(
+          //         `Lat: ${filteredLoc.latitude}, Lon: ${filteredLoc.longitude}`,
+          //       );
+          //     // curr_gps_data.push(filteredLoc);
+          //     curr_gps_data.push(filteredLoc);
+          //   }
+          //   // await sleep(1000);
+          // }
+          // distance_travelled = geolib.getPathLength(curr_gps_data);
+          // // console.log("Distance segment:" + distance_segment);
+          // console.log("Total distance:" + distance_travelled);
+          // // distance_travelled = distance_segment;
+          // setCurrDistance(distance_travelled);
+          // // check the session?
+          // end = await bluetoothLeManager.getBLEStepLog();
+          // if (end == undefined || start.session_code != end.session_code) {
+          //   // session codes are different => different sessions, a reset happened inbetween
+          //   isNewSession = true;
+          //   break;
+          // }
         }
-        console.log('List:' + JSON.stringify(curr_gps_data));
-        // compute the distance given the list
-        const distance = geolib.getPathLength(curr_gps_data);
-        // this distance is a very rough estimate (off by like 10 meters)
-        const end = await bluetoothLeManager.getBLEStepLog();
-        if (end == undefined || start.session_code != end.session_code) {
-          // session codes are different => different sessions, a reset happened inbetween
-          continue;
-        }
-        const total_steps = end.step_count - start.step_count;
-        // console.log("session id:" + end.session_code);
-        console.log("end steps: " + end.step_count);
-        console.log('Distance:' + distance);
-        console.log('Total steps:' + total_steps);
-        const dist_per_step =
-          total_steps != 0 && distance != 0 ? distance / total_steps : 0;
 
-        console.log('Distance per step (m/step):' + dist_per_step);
-        bluetoothLeManager.sendBLEWriteDistancePerStep(dist_per_step);
+        // if (isNewSession || end == undefined) {
+        //   // new session detected from device
+        //   continue;
+        // }
+
+        // reached distance of X meters => send to BLE
+
+        
+        // const res = kFilter.filterAll(flattenGPSCoords(curr_gps_data));
+        // console.log("test:" + flattenGPSCoords(curr_gps_data));
+        // console.log("response:" + res);
+        // console.log("distance:" + geolib.getPathLength(res));
+        // console.log('List:' + JSON.stringify(curr_gps_data));
+        // compute the distance given the list
+        // this distance is a very rough estimate (off by like 10 meters)
+        // if (end == undefined || start.session_code != end.session_code) {
+        //   // session codes are different => different sessions, a reset happened inbetween
+        //   continue;
+        // }
+        // const total_steps = end.step_count - start.step_count;
+        // // // console.log("session id:" + end.session_code);
+        // // console.log("end steps: " + end.step_count);
+        // // console.log('Distance:' + distance);
+        // // console.log('Total steps:' + total_steps);
+        // const dist_per_step =
+        //   total_steps != 0 && distance_travelled != 0 ? distance_travelled / total_steps : 0;
+
+        // // console.log('Distance per step (m/step):' + dist_per_step);
+        // bluetoothLeManager.sendBLEWriteDistancePerStep(dist_per_step);
       }
     }
   };
@@ -289,7 +440,7 @@ const Home: FC = () => {
             <CTAButton
               title="GET GPS LOCATION"
               onPress={() => {
-                getLocation();
+                getGPSLocation();
               }}
             />
           )}
@@ -313,7 +464,7 @@ const Home: FC = () => {
             <CTAButton
               title="GET GPS LOCATION"
               onPress={() => {
-                getLocation();
+                getGPSLocation();
               }}
             />
           )}
@@ -464,7 +615,7 @@ const Home: FC = () => {
               </Text>
               <Text
                 style={{textAlign: 'center', fontSize: 35, marginBottom: 10}}>
-                0 km
+                {curr_distance} m
               </Text>
             </View>
           )}
