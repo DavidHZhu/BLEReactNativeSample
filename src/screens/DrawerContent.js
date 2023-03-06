@@ -19,14 +19,18 @@ import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCircleUser } from '@fortawesome/free-solid-svg-icons';
 import FoundationIcon from 'react-native-vector-icons/Foundation'
 import { AuthContext } from '../components/context';
+import bluetoothLeManager from '../modules/Bluetooth/BluetoothLeManager';
 
 export function DrawerPage(props){
-    const [connectBluetooth, setConnectBluetooth] = React.useState(false);
+    const [deviceUnits, setDeviceUnits] = React.useState(false);
 
     const toggleTheme = () => {
-        setConnectBluetooth(!connectBluetooth);
-    
+        const deviceUnit = !deviceUnits;
+        // send device unit
+        bluetoothLeManager.sendBLEDeviceUnits(deviceUnit);
+        setDeviceUnits(deviceUnit);
     }
+
 
     const { signOut } = React.useContext(AuthContext);
     const { userName } = React.useContext(AuthContext);
@@ -97,14 +101,8 @@ export function DrawerPage(props){
                         />
                     </Drawer.Section>
                     <Drawer.Section style={{paddingBottom: 10}}>
-                        <View style={{flexDirection: 'row', marginLeft: 100}}>
-                            <Text style={{marginTop: 10, fontSize: 15, color: 'black'}}>Bluetooth</Text>
-                            <Icon
-                                name="bluetooth"
-                                color="#318CE7"
-                                size={20}
-                                style={styles.blueTooth}
-                            />
+                        <View style={{flexDirection: 'row', marginLeft: 75}}>
+                            {deviceUnits ? <Text style={{marginTop: 10, fontSize: 15, color: 'black'}}>Device Units: ft/s</Text> : <Text style={{marginTop: 10, fontSize: 15, color: 'black'}}>Device Units: m/s</Text>}
                         </View>
                         <TouchableRipple onPress={() => {toggleTheme()}}>
                             <View style={styles.bluetoothPreference}>
