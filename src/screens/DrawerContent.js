@@ -17,6 +17,8 @@ import {
 import Icon from 'react-native-vector-icons/Ionicons'
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 import { faCircleUser } from '@fortawesome/free-solid-svg-icons';
+import FoundationIcon from 'react-native-vector-icons/Foundation'
+import { AuthContext } from '../components/context';
 
 export function DrawerPage(props){
     const [connectBluetooth, setConnectBluetooth] = React.useState(false);
@@ -26,6 +28,10 @@ export function DrawerPage(props){
     
     }
 
+    const { signOut } = React.useContext(AuthContext);
+    const { userName } = React.useContext(AuthContext);
+    const { userEmail } = React.useContext(AuthContext);
+
     return(
         <View style={{flex:1}}>
             <DrawerContentScrollView {...props}>
@@ -33,9 +39,9 @@ export function DrawerPage(props){
                     <View style={styles.userInfoSection}>
                         <View style={{marginTop: 15}}>
                             <FontAwesomeIcon icon={faCircleUser} size={50} style={styles.profilePicture}/>
-                            <View style={{flexDirection: 'column', marginLeft: 76}}>
-                                <Title style={styles.title}>GuestName</Title>
-                                <Caption style={styles.caption}>GuestEmail</Caption>
+                            <View style={{flexDirection: 'column'}}>
+                                <Title style={styles.title}>{userName}</Title>
+                                <Caption style={styles.caption}>{userEmail}</Caption>
                             </View>
                         </View>
                     </View>
@@ -51,6 +57,18 @@ export function DrawerPage(props){
                             style={{ backgroundColor: '#8c92ac' }}
                             label="Home"
                             onPress={() => {props.navigation.navigate("Home", {screen: "HomeTab"})}}
+                        />
+                        <DrawerItem
+                            icon={({size}) => (
+                                <FoundationIcon
+                                    name="results"
+                                    color="black"
+                                    size={size}
+                                />
+                            )}
+                            style={{ backgroundColor: '#8c92ac' }}
+                            label="History"
+                            onPress={() => {props.navigation.navigate("Home", {screen: "HistoryTab"})}}
                         />
                         <DrawerItem
                             icon={({size}) => (
@@ -147,7 +165,7 @@ export function DrawerPage(props){
                         />
                     )}
                     label="Sign Out"
-                    onPress={() => {}}
+                    onPress={() => {signOut()}}
                 />
             </Drawer.Section>
         </View>
@@ -164,13 +182,15 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 16,
         marginTop: 3,
-        marginLeft: 1,
+        marginRight: 23,
         fontWeight: 'normal',
+        textAlign: 'center'
     },
     caption: {
         fontSize: 14,
         lineHeight: 14,
-        marginLeft: 5,
+        marginRight: 22,
+        textAlign: 'center',
     },
     row: {
         marginTop: 20,

@@ -16,6 +16,7 @@ import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import * as Animatable from 'react-native-animatable';
 import LinearGradient from "react-native-linear-gradient";
 import { BounceIn } from "react-native-reanimated";
+import { AuthContext } from '../components/context';
 
 
 const SignInScreen = ({navigation}) => {
@@ -28,6 +29,8 @@ const SignInScreen = ({navigation}) => {
         checkInputChange: false,
         secureConfirm: true,
     });
+
+    const { signUp } = React.useContext(AuthContext);
 
     const handleInputChange = (value) => {
         if(value.length != 0){
@@ -166,12 +169,17 @@ const SignInScreen = ({navigation}) => {
                     </TouchableOpacity>
                 </View>
                 <View style={styles.button}>
+                    <TouchableOpacity 
+                        onPress={() => {signUp()}}
+                        style={styles.signIn}
+                    >
                     <LinearGradient
                         colors={['#4E78F0', '#5882FA']}
                         style={styles.signIn}
                     >
                         <Text style={styles.textSign}>Sign Up</Text>
                     </LinearGradient>
+                    </TouchableOpacity>
                     <TouchableOpacity 
                         onPress={() => {navigation.goBack()}}
                         style={styles.signUp}
