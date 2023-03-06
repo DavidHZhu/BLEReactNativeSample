@@ -135,6 +135,13 @@ const Home: FC = () => {
   const [speed, setCurrSpeed] = useState(0);
   const [average_speed, setAverageSpeed] = useState(0);
   // const [CSeconds, setCSeconds] = useState(0);
+  const [startDate, setStartDate] = useState(null);
+  // const [endDate, setEndDate] = useState(null);
+  // const [times, setTimes] = 
+  // useState<{start: Date; end: Date}>({
+  //     start: new Date(),
+  //     end: new Date(),
+  //   });
 
 
   // const [locationSubscription, setLocationSubscription] = useState(RNLocation.subscribeToLocationUpdates(locations => locations));
@@ -696,6 +703,7 @@ const Home: FC = () => {
   }
 
   function HomeScreen() {
+    const [start, setStart] = useState(0);
     const [CSeconds, setCSeconds] = useState(0);
     const [currentPaceSelected, isCurrentPaceSeleted] = useState("");
     const [avgPaceSelected, isAvgPaceSeleted] = useState("");
@@ -748,6 +756,15 @@ const Home: FC = () => {
           stopButton: buttonInfo.stopButton === false ? true : buttonInfo.stopButton,
           isRunning: (buttonInfo.startButton === true && buttonInfo.pauseButton === false) ? true : false
       });
+      if (buttonInfo.isRunning && !buttonInfo.startButton) {
+        // setStartDate(new Date());
+        // start = Date.now();
+        console.log(start);
+      } else {
+        console.log("not started")
+        setStart(Date.now());
+        console.log(start);
+      }
     }
 
     const stopButton = () => {
@@ -757,8 +774,11 @@ const Home: FC = () => {
           stopButton: false,
           isRunning: false,
       });
+      console.log("start", start, "end", Date.now());
+      const duration = Date.now()-start;
+      console.log(duration + ' ms');
       const newRun: Run = {
-        duration: timeDisplay(CSeconds),
+        duration: timeDisplay(Math.floor(duration / 10)),
         avg_pace: '3',
         distance: curr_distance.toString(),
         date: new Date().toISOString().split('T')[0],
@@ -815,8 +835,8 @@ const Home: FC = () => {
         </View>
         <View style={{flexDirection: 'column'}}>
           {isDuration && <View style={{marginTop: 10, marginLeft: 15, marginRight: 15, borderWidth: 2, borderRadius: 10, borderColor: '#F08080'}}>
-            <Text style={{textAlign: 'center', fontSize: 35, color: '#E9967A'}}>Duration</Text>
-            <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 5}}>{displayWatch()}</Text>
+            <Text style={{textAlign: 'center', fontSize: 35, color: '#E9967A'}}>Time</Text>
+            <Text style={{textAlign: 'center', fontSize: 35, marginBottom: 5}}>{buttonInfo.isRunning ? "Push to Stop" : "Push to Start"}</Text>
           </View>}
           {(isAveragePace || isCurrentPace) && <View style={{marginLeft: 15, marginRight: 15, borderBottomWidth: 2, borderBottomColor: '#F08080', flexDirection: 'row', alignContent: 'center', alignItems: 'center', justifyContent: 'space-evenly'}}>
             {isCurrentPace && <View>
