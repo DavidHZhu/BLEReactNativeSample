@@ -74,7 +74,7 @@ export function DrawerPage(props){
                             label="History"
                             onPress={() => {props.navigation.navigate("Home", {screen: "HistoryTab"})}}
                         />
-                        <DrawerItem
+                        {/* <DrawerItem
                             icon={({size}) => (
                                 <Icon
                                     name="map"
@@ -85,7 +85,7 @@ export function DrawerPage(props){
                             style={{ backgroundColor: '#8c92ac' }}
                             label="Map"
                             onPress={() => {props.navigation.navigate("Home", {screen: "MapTab"})}}
-                        />
+                        /> */}
                         <DrawerItem
                             icon={({size}) => (
                                 <Icon

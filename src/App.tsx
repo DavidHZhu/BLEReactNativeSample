@@ -576,15 +576,15 @@ const Home: FC = () => {
               }}
             />
           )} */}
-          {isConnected && (
+          {/* {isConnected && (
             <CTAButton
               title="BLE WRITE"
               onPress={() => {
                 bluetoothLeManager.sendBLEWriteString(myState);
               }}
             />
-          )}
-          {isConnected && (
+          )} */}
+          {/* {isConnected && (
             <CTAButton
               title="SEND HEIGHT"
               onPress={() => {
@@ -598,7 +598,7 @@ const Home: FC = () => {
                 }
               }}
             />
-          )}
+          )} */}
           {isConnected && (
             <CTAButton
               title="RESET"
@@ -973,7 +973,7 @@ const Home: FC = () => {
     );
   }
   const HomeStack = createNativeStackNavigator();
-  const MapStack = createNativeStackNavigator();
+  // const MapStack = createNativeStackNavigator();
   const BluetoothStack = createNativeStackNavigator();
   const HistoryStack = createNativeStackNavigator();
   const SettingsDrawer = createDrawerNavigator();
@@ -999,7 +999,7 @@ const Home: FC = () => {
             ),
           }}
         />
-        <BottomTab.Screen
+        {/* <BottomTab.Screen
           name="MapTab"
           component={MapStackScreen}
           options={{
@@ -1009,7 +1009,7 @@ const Home: FC = () => {
               <MaterialIcon name="google-maps" color={color} size={30} />
             ),
           }}
-        />
+        /> */}
         <BottomTab.Screen
           name="BluetoothTab"
           component={BluetoothStackScreen}
