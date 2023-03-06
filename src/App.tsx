@@ -848,7 +848,7 @@ const Home: FC = () => {
         <View style={{flexDirection: 'row', marginTop: 20}}>
           <View style={{paddingLeft: 25, flexDirection: 'row'}}>
             <TextInput onChangeText={setGoalPace} value={GoalPace} placeholder='set a pace' keyboardType='numeric' style={{textAlign:'center', width:100, borderWidth:1, height:40, borderRadius: 30}}/>
-            <Text style={{paddingLeft: 2, paddingTop: 10}}>km/min</Text>
+            <Text style={{paddingLeft: 2, paddingTop: 10}}>min/km</Text>
           </View>
           <View>
             <View style={{paddingLeft: 20, flexDirection: 'row'}}>
@@ -858,7 +858,7 @@ const Home: FC = () => {
           </View>
           {(GoalDistance !== "" && GoalPace !== "") &&
             <View style={{paddingLeft: 20, paddingTop: 5}}>
-              {(Number(GoalDistance) >= (total_distance/1000) && Number(GoalPace) >= (average_speed/1000*60))
+              {(Number(GoalDistance) >= (total_distance/1000) && Number(GoalPace) >= (16.667)/average_speed)
               ? <AntDesignIcon name="checkcircle" size={30} color="green"/>
               : <AntDesignIcon name="closecircle" size={30} color="red"/>
               }
