@@ -83,6 +83,8 @@ let init_count = 0;
 let limit = 1;
 let curr_distance = 0;
 let total_dist = 0;
+let total_time = 0;
+
 
 const formatStopWatch = (number : number) => (number <= 9 ? `0${number}` : number);
 
@@ -772,7 +774,7 @@ const Home: FC = () => {
           isRunning: (buttonInfo.startButton === true && buttonInfo.pauseButton === false) ? true : false
       }
       setButtonInfo(currButtonState);
-      if (currButtonState.isRunning && !currButtonState.startButton) {
+      if (currButtonState.stopButton && currButtonState.isRunning && !currButtonState.startButton) {
         // setStartDate(new Date());
         // start = Date.now();
         console.log("started");
@@ -782,6 +784,9 @@ const Home: FC = () => {
         console.log("not started")
         // setStart(Date.now());
         // console.log(start);
+        
+        const time_seg = Date.now() - startDate;
+        total_time += time_seg;
         unsubscribe.unsub();
         setUnsubscribe(null);
       }
@@ -796,13 +801,15 @@ const Home: FC = () => {
       });
       console.log("start", start, "end", Date.now());
       const duration = Date.now()-startDate;
-      console.log(duration + ' ms');
+      total_time += duration;
+      console.log(total_time + ' ms');
       const newRun: Run = {
-        duration: timeDisplay(Math.floor(duration / 10)),
+        duration: timeDisplay(Math.floor(total_time / 10)),
         avg_pace: average_speed.toString(),
         distance: total_distance.toString(),
         date: new Date().toISOString().split('T')[0],
       }
+      total_time = 0;
       authContext.user.runs.push(newRun);
       console.log("stopped here");
       unsubscribe.unsub();
