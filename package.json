@@ -30,6 +30,7 @@
     "react-native-background-timer": "^2.4.1",
     "react-native-base64": "^0.2.1",
     "react-native-ble-plx": "2.0.3",
+    "react-native-dropdown-select-list": "^2.0.4",
     "react-native-gesture-handler": "^2.8.0",
     "react-native-gps-kalman": "^1.0.2",
     "react-native-linear-gradient": "^2.6.2",

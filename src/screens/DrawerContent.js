@@ -119,14 +119,6 @@ export function DrawerPage(props){
                             <Text style={{marginTop: 10, fontSize: 15, color: 'black', marginBottom: 10}}>Display Settings</Text>
                         </View>
                         <View style={styles.displaySettings}>
-                            <TouchableRipple onPress={() => {props.toggleShowDuration()}}>
-                                <View style={styles.preference}>
-                                    <Text>DURATION</Text>
-                                    <View pointerEvents="none">
-                                        <Switch value={props.showDuration}/>
-                                    </View>
-                                </View>
-                            </TouchableRipple>
                             <TouchableRipple onPress={() => {props.toggleShowAveragePace()}}>
                                 <View style={styles.preference}>
                                     <Text>AVERAGE PACE</Text>
