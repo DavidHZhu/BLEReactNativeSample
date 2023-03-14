@@ -342,18 +342,18 @@ const Home: FC = () => {
               if (init_count >= limit) {
                 if (prev_loc == null) {
                   prev_loc = {
-                    // lat: filteredLoc.latitude,
-                    // lon: filteredLoc.longitude,
-                    lat: firstLoc.latitude,
-                    lon: firstLoc.longitude,
+                    lat: filteredLoc.latitude,
+                    lon: filteredLoc.longitude,
+                    // lat: firstLoc.latitude,
+                    // lon: firstLoc.longitude,
                     timestamp: locations[0].timestamp,
                   }
                 } else {
                   const curr_loc = {
-                    // lat: filteredLoc.latitude,
-                    // lon: filteredLoc.longitude,
-                    lat: firstLoc.latitude,
-                    lon: firstLoc.longitude,
+                    lat: filteredLoc.latitude,
+                    lon: filteredLoc.longitude,
+                    // lat: firstLoc.latitude,
+                    // lon: firstLoc.longitude,
                     timestamp: locations[0].timestamp,
                   };
                   const location_pair = [prev_loc, curr_loc];
@@ -787,8 +787,10 @@ const Home: FC = () => {
         
         const time_seg = Date.now() - startDate;
         total_time += time_seg;
-        unsubscribe.unsub();
-        setUnsubscribe(null);
+        if (unsubscribe != null) {
+          unsubscribe.unsub();
+          setUnsubscribe(null);
+        }
       }
     }
 
@@ -812,8 +814,10 @@ const Home: FC = () => {
       total_time = 0;
       authContext.user.runs.push(newRun);
       console.log("stopped here");
-      unsubscribe.unsub();
-      setUnsubscribe(null);
+      if (unsubscribe != null) {
+        unsubscribe.unsub();
+        setUnsubscribe(null);
+      }
       // locationSubscription();
       setTotalDistance(0);
       setCurrSpeed(0);
