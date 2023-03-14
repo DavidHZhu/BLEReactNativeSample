@@ -359,7 +359,7 @@ const Home: FC = () => {
                   const location_pair = [prev_loc, curr_loc];
                   const pair_distance = geolib.getPathLength(location_pair);
                   console.log("pair distance:" + pair_distance);
-                  const time_taken = location_pair[1].timestamp - location_pair[0].timestamp;
+                  const time_taken = (location_pair[1].timestamp - location_pair[0].timestamp)/1000;
                   const curr_speed = time_taken != 0 ? pair_distance / time_taken : 0.0;
                   speeds.push(curr_speed);
                   prev_loc = curr_loc;
